@@ -4,24 +4,24 @@
 % Update: https://github.com/TheNetAdmin/zjuthesis/releases
 
 \documentclass[
-    StudentName = 姓名,
-    StudentID   = 学号,
-    AdvisorName = 指导教师,
-    Grade       = 2014,   % only the year, no `级`
-    Major       = 专业,
-    Department  = 学院,
-    Title       = 毕业论文/设计题目,
+    StudentName = 帅青,
+    StudentID   = 3150105533,
+    AdvisorName = 阮晓东(院内)/周晓巍(院外),
+    Grade       = 2015,   % only the year, no `级`
+    Major       = 机械电子工程,
+    Department  = 机械工程学院,
+    Title       = 单目视频中的人体三维姿态估计,
     SubmitDate  = 递交日期,
     MajorFormat = cs,
     Type        = design, % `thesis` or `design`
-    Period      = final,  % `final`  or `proposal`
+    Period      = proposal,  % `final`  or `proposal`
     BlindReview = false   % `true`   or `false`
 ]{config/zjuthesis}
-
+    
 \newcommand{\inputfinal}
 {
     % Final part
-    \newrefsection
+    % \newrefsection
     \inputpage{final/cover}
     \inputpage{final/previous}
     \inputpage{final/toc}
@@ -35,7 +35,7 @@
     \inputpage{final/post}
 
     % Proposal part
-    \newrefsection
+    % \newrefsection
     \cleardoublestylepage{empty}
     \ifthenelse{\equal{\Type}{design}}
         {\part{毕业设计开题报告}}

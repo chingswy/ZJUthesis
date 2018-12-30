@@ -1,0 +1,137 @@
+% 2012/10/17
+
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage[lined]{algorithm2e}
+% \usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
+\usepackage{placeins}
+\usepackage{booktabs}
+
+\newcommand{\R}[1]{\mathbb{R}^{#1}}
+\newcommand{\RR}[2]{\mathbb{R}^{#1 \times #2}}
+\newcommand{\Bin}[2]{[0,1]^{#1 \times #2}}
+% \newcommand{\G}{\mathcal{G}}
+
+\newcommand{\inner}[2]{\langle #1, #2\rangle}
+\newcommand{\norm}[2]{\left\|#1\right\|_{#2}}
+\newcommand{\med}[1]{\mbox{median}\left{#1\right}}
+\newcommand{\trace}[1]{\mbox{trace}\left(#1\right)}
+\newcommand{\rank}[1]{\mbox{rank}\left(#1\right)}
+\newcommand{\vect}[1]{\mbox{vec}\left(#1\right)}
+\newcommand{\conv}[1]{\mbox{conv}\left(#1\right)}
+\newcommand{\diag}{\mbox{diag}}
+\newcommand{\proj}{\mathcal{P}}
+\newcommand{\svt}{\mathcal{D}}
+\newcommand{\prox}{\mbox{prox}}
+\newcommand{\st}{\mbox{s.t.~}}
+\newcommand{\pr}{\mbox{Pr}}
+
+\DeclareMathOperator*{\argmax}{arg\!\max}
+\DeclareMathOperator*{\argmin}{arg\!\min}
+
+\newcommand{\refLemma}[1]{Lemma~\ref{#1}}
+\newcommand{\refEq}[1]{(\ref{#1})}
+\newcommand{\refFig}[1]{Figure~\ref{#1}}
+\newcommand{\refProp}[1]{Proposition~\ref{#1}}
+\newcommand{\refTheor}[1]{Theorem~\ref{#1}}
+\newcommand{\refSec}[1]{Section~\ref{#1}}
+\newcommand{\refCh}[1]{Chapter~\ref{#1}}
+\newcommand{\refAlg}[1]{Algorithm~\ref{#1}}
+\newcommand{\refTab}[1]{Table~\ref{#1}}
+\newcommand{\refBib}[1]{\citep{#1}}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+%\newenvironment{proof}[1][Proof]{\begin{trivlist}
+%\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+%\newenvironment{definition}[1][Definition]{\begin{trivlist}
+%\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+%\newenvironment{example}[1][Example]{\begin{trivlist}
+%\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+%\newcommand{\qed}{\nobreak \ifvmode \relax \else
+%      \ifdim\lastskip<1.5em \hskip-\lastskip
+%      \hskip1.5em plus0em minus0.5em \fi \nobreak
+%      \vrule height0.75em width0.5em depth0.25em\fi}
+
+\def\Pr{\text{Pr}}
+\def\eg{{e.g.~}}
+\def\ie{{i.e.~}}
+\def\vs{{vs.~}}
+\def\wrt{w.r.t.~}
+\def\etal{{et al.~}}
+\def\iid{i.i.d.~}
+\def\etc{{etc.~}}
+
+\usepackage{bm}
+
+\def\bfa{{\bm{a}}}
+\def\bfb{{\bm{b}}}
+\def\bfc{{\bm{c}}}
+\def\bfd{{\bm{d}}}
+\def\bfe{{\bm{e}}}
+\def\bff{{\bm{f}}}
+\def\bfg{{\bm{g}}}
+\def\bfh{{\bm{h}}}
+\def\bfi{{\bm{i}}}
+\def\bfj{{\bm{j}}}
+\def\bfk{{\bm{k}}}
+\def\bfl{{\bm{l}}}
+\def\bfm{{\bm{m}}}
+\def\bfn{{\bm{n}}}
+\def\bfo{{\bm{o}}}
+\def\bfp{{\bm{p}}}
+\def\bfq{{\bm{q}}}
+\def\bfr{{\bm{r}}}
+\def\bfs{{\bm{s}}}
+\def\bft{{\bm{t}}}
+\def\bfu{{\bm{u}}}
+\def\bfv{{\bm{v}}}
+\def\bfw{{\bm{w}}}
+\def\bfx{{\bm{x}}}
+\def\bfy{{\bm{y}}}
+\def\bfz{{\bm{z}}}
+\def\bfA{{\bm{A}}}
+\def\bfB{{\bm{B}}}
+\def\bfC{{\bm{C}}}
+\def\bfD{{\bm{D}}}
+\def\bfE{{\bm{E}}}
+\def\bfF{{\bm{F}}}
+\def\bfG{{\bm{G}}}
+\def\bfH{{\bm{H}}}
+\def\bfI{{\bm{I}}}
+\def\bfJ{{\bm{J}}}
+\def\bfK{{\bm{K}}}
+\def\bfL{{\bm{L}}}
+\def\bfM{{\bm{M}}}
+\def\bfN{{\bm{N}}}
+\def\bfO{{\bm{O}}}
+\def\bfP{{\bm{P}}}
+\def\bfQ{{\bm{Q}}}
+\def\bfR{{\bm{R}}}
+\def\bfS{{\bm{S}}}
+\def\bfT{{\bm{T}}}
+\def\bfU{{\bm{U}}}
+\def\bfV{{\bm{V}}}
+\def\bfW{{\bm{W}}}
+\def\bfX{{\bm{X}}}
+\def\bfY{{\bm{Y}}}
+\def\bfZ{{\bm{Z}}}
+
+\def \bfalpha {\bm{\alpha}}
+\def \bfbeta {\bm{\beta}}
+\def \bfgamma {\bm{\gamma}}
+\def \bfmu {\bm{\mu}}
+\def \bfsigma {\bm{\sigma}}
+
+\def\bfzero{{\bm{0}}}
+\def\bfone{{\bm{1}}}
+\def\half{\frac{1}{2}~}
+\def\reg{\mathcal{R}}
+\def\incmat{{\mathcal{A}}}

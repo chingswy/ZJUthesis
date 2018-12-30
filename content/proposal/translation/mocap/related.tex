@@ -1,0 +1,20 @@
+%!TEX root = main.tex
+
+大量研究已经解决了图像中人体运动捕获的挑战\cite{moeslund2006survey,sminchisescu20073d,brubaker2010video,deva2011_Book,sarafianos20163d}。
+我们的工作包括单张图片 (e.g., \cite{yang2011articulated,toshev2014deep,chen2014articulated,jain2014learning,tompson2014joint}), 和视频, e.g., \cite{sapp2011,cherian2014,nie2015joint,park2015articulated,pfister2015flowing,zhang2015human,newell2016stacked} 中的2D人体姿态恢复。
+在当前的工作中，我们的重点在3D姿态恢复上，其中姿势模型和其先验都在自然的3D域中表示。
+
+对视频中的3D单眼姿势估计的早期研究主要集中在用于帧到帧姿势跟踪的生成模型上, e.g.,  \cite{bregler1998tracking,sminchisescu2003kinematic}. 
+这些方法依赖于给定的姿势和动态模型来约束姿势搜索空间。
+这种方法的显着缺点包括：要求提供初始化，以及无法从跟踪失败中恢复。为了解决这些局限性，在最近的工作中提出了自下而上的模型 e.g., the ``松散骨架的人体模型'' \cite{sigal2012loose} 和``通过检测来跟踪'' \cite{andriluka2010monocular}.
+
+另一项研究重点是通过搜索样本数据库\cite{shakhnarovich2003fast,mori2006recovering,jiang20103d,yasin2016dual}，或通过学习从图像直接到人类关节位置的映射，来预测3D姿势 \cite{agarwal2006recovering,bo2010twin,salzmann2010implicitly,yu2013unconstrained,ionescu2014human,kostrikov2014depth}。
+
+最近，深度卷积网络（CNN）已经成为许多现有技术方法背后的共同元素，包括例如3D人体姿态估计\cite{li20143d,li2015maximum,tekin2015predicting,du2016marker,park20163d,zhou2016deep}。
+
+为了应对训练数据的稀缺性，最近的一些工作通过图形渲染\cite{chen2016synthesizing}或图像拼接\cite{rogez2016mocap}来合成训练图像。 
+
+与我们的工作最密切相关的是：用单个相机捕获的图像序列恢复3D非刚性形状的方法，即运动恢复非刚性结构（NRSFM），\cite{bregler2000recovering,akhter2011trajectory,dai2012simple,zhu2014complex,cho2015complex}, i.e., 运动恢复非刚性结构 (NRSFM)，和基于已知骨架\cite{lee1985determination,taylor2000reconstruction,valmadre2010deterministic,park20113d,radwan2013monocular,leonardos2016articulated}或稀疏表示的人体姿势恢复模型。 \cite{ramakrishna2012reconstructing,fan2014pose,akhter2015pose,zhou20153d,zhou2015sparse}. 通过手动标记的2D关节位置，实现了这些工作的大部分；然而，最近的一些工作已经使用2D姿势检测器来自动提供输入关节\cite{simo2012single,wang2014robust}，或联合解决2D和3D姿态估计\cite{simo2013joint,zhou2014spatio}。
+
+
+

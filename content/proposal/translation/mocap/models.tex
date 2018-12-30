@@ -1,0 +1,90 @@
+在本节中，介绍了描述3D姿势，2D姿势和图像之间关系的模型。
+\subsection{3D姿势的稀疏表示}
+3D人体姿势由一组 $p$ 关节的3D位置表示, 第 $t$ 帧记为$\bfS_t\in\RR{3}{p}$ .
+一般来说，单视图重建是一个不适定的问题。 为了解决这个问题，假设3D姿势可以表示为预定义基础姿势的线性组合：
+\begin{align}\label{eq:shape-model}
+    \bfS_t = \sum_{i=1}^{k} c_{it}\bfB_i,
+\end{align}
+其中$\bfB_i\in\RR{3}{p}$ 表示一组姿势基， $c_{it}$ 表示相应的权重. 基础姿势是从MoCap数据集提供的训练姿势中学习的。
+
+传统的活动形状模型\cite{cootes1995}中基相对较小，我们没有采用，而是使用稀疏表示的方法，这种方法已经在最近的工作中显示为能够对人体姿势的大变化进行建模，例如\cite{ramakrishna2012reconstructing,akhter2015pose,zhou2015sparse}.
+
+也就是说一个完整的字典 $\{\bfB_1,\cdots,\bfB_k\}$,是从一个相对较大的姿势几何中学习得到的,其中系数为 $k$, 假设 $c_{it}$是稀疏的. 在本文的其余部分，
+%$\bfc_t$ denotes the coefficient vector $[c_{1t},\cdots,c_{kt}]^\top$ for frame $t$ and $\bfC$ denotes the matrix composed of all $\bfc_{t}$.
+$\bfc_t = [c_{1t},\cdots,c_{kt}]^\top$ 表示帧 $t$的系数向量，$\bfC$ 为由所有的 $\bfc_{t}$组成的矩阵。
+
+
+\subsection{2D和3D姿势之间的依赖性}
+
+\subsubsection{正交相机模型}
+
+当相机固有参数未知时，正交相机模型用于描述3D姿势与其成像2D姿势之间的依赖关系：
+\begin{align}\label{eq:camera-model}
+    \bfW_t = \bfR_t\bfS_t + \bfT_t\bfone^\top,
+\end{align}
+where $\bfW_t\in\RR{2}{p}$ denotes the 2D pose in frame $t$, and $\bfR_t\in\RR{2}{3}$ and $\bfT_t\in\R{2}$ the camera rotation and translation, respectively. In the following, $\bfW$, $\bfR$ and $\bfT$ denote the collections of $\bfW_t$, $\bfR_t$ and $\bfT_t$ for all $t$, respectively.
+
+考虑到观测噪声和模型误差，给定3D姿态参数的2D姿态的条件分布被建模为
+\begin{align}\label{eq:likelihood}
+\pr(\bfW|\theta) \propto e^{-\mathcal{L}(\theta;\bfW)},
+\end{align}
+where $\theta=\{\bfC,\bfR,\bfT\}$ 是所有3D姿势参数的并集
+%where $\theta$ is the union of all the 3D pose parameters
+%$\theta=\{\bfC,\bfR,\bfT\}$
+and the loss function, $\mathcal{L}(\theta;\bfW)$, 被定义为
+\begin{align}\label{eq:loss}
+\mathcal{L}(\theta;\bfW) = \frac{\nu}{2}\sum_{t=1}^{n}\left\|\bfW_t - \bfR_t\sum_{i=1}^{k} c_{it}\bfB_i - \bfT_t\bfone^\top\right\|_F^2,
+\end{align}
+
+使用$\|\cdot\|_F$表示Frobenius范数。\refEq{eq:likelihood}中的模型表明，给定3D姿势和相机参数，每个关节的2D位置属于高斯分布，其平均值等于其3D对应物的投影和精度（即，方差的逆）等于$\nu$。
+
+与之前的作品相比\cite{zhou2015sparse}，\refEq{eq:loss}中的损失函数等同于先前作品中提出的\cite{zhou2015sparse}在帧上的求和。
+
+%But different from 
+我们将模型扩展到透视摄像机的情况，将2D姿势视为潜在变量而不是固定输入，并施加时间平滑约束，如以下小节中所介绍的。
+
+\subsubsection{透视相机模型}
+
+当给出相机固有参数时，由校准矩阵$\bf K$表示，透视相机模型用于描述2D和3D姿势之间的依赖关系：
+
+\begin{align}\label{eq:model-fp}
+    \bfK^{-1}\bfW_t\bfZ_t = \bfR_t\bfS_t + \bfT_t\bfone^\top,
+\end{align}
+where $\bfW_t\in\RR{3}{p}$ denotes the homogeneous coordinates of 2D joints, $\bfR_t\in\RR{3}{3}$ and $\bfT_t\in\R{3}$ are the rotation and translation in 3D, and $\bfZ_t\in\RR{p}{p}$ is a diagonal matrix with diagonal elements denoting the depth values of joints. Correspondingly, the loss function in the perspective case is defined as:
+\begin{align}\label{eq:loss-fp}\small
+\mathcal{L}(\theta;\bfW) = \frac{\nu}{2}\sum_{t=1}^{n}\left\|\bfK^{-1}\bfW_t\bfZ_t - \bfR_t\sum_{i=1}^{k} c_{it}\bfB_i - \bfT_t\bfone^\top\right\|_F^2,
+\end{align}
+where $\theta=\{\bfC,\bfR,\bfT,\bfZ\}$.
+
+请注意，最小化\refEq{eq:loss-fp}中的损失会产生一个简单的解决方案，其中所有变量由于透视模型中固有的尺度模糊而收敛到零。 为了避免这种简单的解决方案，通过在优化期间添加以下约束来强制执行根关节的深度：
+
+\begin{align}
+z_{1t}=1,
+\end{align}
+where $z_{1t}$ denotes the first diagonal element of $\bfZ_t$ corresponding to the root joint.
+
+\subsection{姿势和图像之间的依赖性}
+
+当给出2D姿势时，我们假设3D姿势参数的分布在条件上独立于图像数据。 因此，$\theta$的似然函数可以分解为
+\begin{align}\label{eq:likelihood-complete}
+\pr(\bfI,\bfW|\theta) = \pr(\bfI|\bfW)\pr(\bfW|\theta),
+\end{align}
+where $\bfI=\{\bfI_1,\cdots,\bfI_n\}$ denotes the image data. The conditional distribution $\pr(\bfW|\theta)$ is given in \refEq{eq:likelihood}. We assume that the likelihood function $\pr(\bfI|\bfW)$ given the image data can be learned discriminatively using a CNN and written as
+\begin{align}\label{eq:pr-I-W}
+\pr(\bfI|\bfW) \propto \Pi_{t}\Pi_{j}h_j(\bfw_{jt};\bfI_t),
+\end{align}
+where $\bfw_{jt}$ denotes the image location of joint $j$ in frame $t$, and $h_j(\cdot;\bfI_t)$ represents a mapping from an image $\bfI_t$ to the likelihood of the joint location (termed heat map).
+For each joint $j$, the mapping $h_j$ is approximated by a CNN (described in \refSec{sec:cnn}).
+
+\subsection{模型参数的先验}
+
+介绍了模型参数的以下惩罚函数：
+\begin{align}\label{eq:prior}
+\mathcal{R}(\theta) = \alpha\|\bfC\|_1 + \frac{\beta}{2}\|\nabla_t\bfC\|_F^2 + \frac{\gamma}{2}\|\nabla_t\bfR\|_F^2,
+\end{align}
+where $\|\cdot\|_1$ denotes the $\ell_1$-norm (i.e., the sum of absolute values), $\nabla_t$ the discrete temporal derivative operator, and
+$\alpha, \beta, \gamma$ are scalar weights. 
+第一项惩罚姿势系数的基数以引起稀疏姿势表示。 第二和第三项对姿势系数和旋转施加一阶平滑约束。
+可以对翻译组件施加类似的平滑约束; 然而，根据经验，我们没有观察到其包含的明显性能差异。
+
+

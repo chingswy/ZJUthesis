@@ -36,3 +36,4 @@
 \input{config/format/format}
 \input{config/commands}
 \input{config/version}
+\input{config/macro.tex}

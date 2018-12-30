@@ -1,0 +1,153 @@
+%!Tex root = main.tex
+
+在本节中，我们描述了我们的3D姿态推理方法。 在这里，区分了两种情况：(i) 提供了关节的图像位置 (Section\ \ref{sec:known}), 以及
+(ii) 关节位置未知 (Section \ref{sec:unknown}).
+
+\subsection{提供了关节的位置}\label{sec:known}
+
+When the 2D poses, $\bfW$, are given, the model parameters, $\theta$, are recovered via penalized maximum likelihood estimation (MLE):
+\begin{align}\label{eq:pmle}
+\theta^* &= \argmax_{\theta} ~ \ln\pr(\bfW|\theta) - \mathcal{R}(\theta) \nonumber \\
+& = \argmin_{\theta} ~ \mathcal{L}(\theta;\bfW) + \mathcal{R}(\theta).
+\end{align}
+ \refEq{eq:pmle} 中的问题通过块坐标下降来解决，即，在固定其他变量时交替更新一个变量块。
+
+\subsubsection{正投影模型}
+
+在正交模型下，损失函数在\refEq{eq:loss}中给出，并且每次迭代中的更新规则在下面给出。
+
+The update of $\bfC$ needs to solve:
+\begin{align}\label{eq:C-step}
+\bfC \leftarrow \argmin_{\bfC} ~~ \mathcal{L}(\bfC;\bfW) + \alpha\|\bfC\|_1 + \frac{\beta}{2}\|\nabla_t\bfC\|_F^2,
+\end{align}
+where the objective is the composite of two differentiable functions plus an $\ell_1$ penalty. The problem in \refEq{eq:C-step} is solved by accelerated proximal gradient (APG) \cite{nesterov2007gradient}.
+Since the problem in \refEq{eq:C-step}  is convex, global optimality is guaranteed. 
+
+The update of $\bfR$ needs to solve:
+\begin{align}\label{eq:R-step}
+\bfR \leftarrow \argmin_{\bfR} ~~ \mathcal{L}(\bfR;\bfW) + \frac{\gamma}{2}\|\nabla_t\bfR\|_F^2,
+\end{align}
+如果目标是可微的，并且变量被旋转限制为$SO(3)$。 这里，采用流形优化来使用Manopt工具箱中的信赖域求解器更新旋转\cite{boumal2014manopt}.
+
+The update of $\bfT$ has the following closed-form solution:
+\begin{align}\label{eq:T-step}
+\bfT_t \leftarrow \mbox{row mean}\left\{\bfW_t - \bfR_t\bfS_t\right\}.
+\end{align}
+
+\subsubsection{透视相机模型}
+
+
+在透视模型下，损失函数在\refEq{eq:loss-fp}中给出，并且每次迭代中的更新规则在下面给出。
+
+The update rules for $\bfC$ and $\bfR$ have the same forms as the orthographic case given in \refEq{eq:C-step} and \refEq{eq:R-step}, respectively.
+
+The update of $\bfT$ has the following closed-form solution:
+\begin{align}\label{eq:T-step-fp}
+\bfT_t \leftarrow \mbox{row mean}\left\{\bfK^{-1}\bfW_t\bfZ_t - \bfR_t\bfS_t\right\}.
+\end{align}
+
+The update of $\bfZ$ is also closed-form. Suppose $z_{it}$ denotes the $i$-th diagonal element of $\bfZ_t$, $\bfu_{it}$ the $i$-th column of $\bfK^{-1}\bfW_t$, and $\bfv_{it}$ the $i$-th column of $\bfR_t\bfS_t+\bfT_t\bfone^\top$. Then the solution for each $z_{it}$ is  
+\begin{align}\label{eq:Z-step}
+z_{it}\leftarrow 
+\begin{cases}
+     1 & \mbox{if $i=1$}, \\
+    \frac{\bfu_{it}^\top\bfv_{it}}{\bfu_{it}^\top\bfu_{it}} & \mbox{otherwise}
+\end{cases}.
+\end{align}
+
+给出2D姿势的3D姿态推理的整个算法总结在\refAlg{alg:bcd}中。一旦目标值收敛，迭代就终止。由于在每个步骤中目标函数不增加，因此保证算法终止; 但是，由于\refEq{eq:pmle}中的问题是非凸的，因此该算法需要适当选择的初始化（在\refSec{sec:initialization}中描述）。
+
+\begin{algorithm}[t]\label{alg:bcd}
+\LinesNumbered
+\caption{在正交投影或透视投影相机模型下，块坐标下降解\refEq{eq:pmle}}
+\vspace{0.3em}
+\KwIn{$\bfW$ \tcp*[r]{\small 2D joint locations}}
+\KwOut{$\theta$ \tcp*[r]{\small 3D pose parameters}}
+\vspace{0.3em}
+initialize the parameters \tcp*{\small \refSec{sec:initialization}}
+\While{not converged}{
+update $\bfC$ by \refEq{eq:C-step} with APG \;
+update $\bfR$ by \refEq{eq:R-step} with Manopt \;
+update $\bfT$ by \refEq{eq:T-step} if using orthographic model \\
+~~~~~~~~~~~~or by \refEq{eq:T-step-fp} if using perspective model \;
+update $\bfZ$ by \refEq{eq:Z-step} if using perspective model \;
+}
+\end{algorithm}
+
+\subsection{未知的2D姿势}\label{sec:unknown}
+
+如果2D姿势未知，则$\bfW$被视为潜在变量，并在估算过程中被边缘化。 边缘化似然函数是
+
+\begin{align}
+\pr(\bfI|\theta) = \int\pr(\bfI,\bfW|\theta)d\bfW, \label{eq:marginalization}
+\end{align}
+where $\pr(\bfI,\bfW|\theta)$ is given in \refEq{eq:likelihood-complete}.
+
+(\ref{eq:marginalization}) 的直接边缘化是难以处理的。
+相反，开发EM算法来计算惩罚的MLE。
+
+在期望步骤中，在给定图像数据和所有3D姿势参数的先前估计的情况下，相对于$\bfW$的条件分布计算惩罚对数似然的期望，$\theta'$
+\begin{align}
+&Q(\theta|\theta') = \int \left\{\ln\pr(\bfI,\bfW|\theta) - \mathcal{R}(\theta)\right\} ~ \pr(\bfW|\bfI,\theta') d\bfW \nonumber \\
+&= \int \left\{\ln\pr(\bfI|\bfW) + \ln\pr(\bfW|\theta) - \mathcal{R}(\theta)\right\} \pr(\bfW|\bfI,\theta') d\bfW \nonumber \\
+&= \mbox{const} - \int \mathcal{L}(\theta;\bfW) \pr(\bfW|\bfI,\theta') d\bfW - \mathcal{R}(\theta).
+\end{align}
+
+可以证明（参见附录中的推导）
+\begin{align}\label{eq:der1}
+\int \mathcal{L}(\theta;\bfW) \pr(\bfW|\bfI,\theta') d\bfW = \mathcal{L}(\theta;\mathbb{E}\left[\bfW|\bfI,\theta'\right]) + \mbox{const},
+\end{align}
+where $\mathbb{E}\left[\bfW|\bfI,\theta'\right]$ is the expectation of $\bfW$ given $\bfI$ and $\theta'$:
+\begin{align}\label{eq:der2}
+\mathbb{E}\left[\bfW|\bfI,\theta'\right]
+&= \int \pr(\bfW|\bfI,\theta')~ \bfW ~ d\bfW \nonumber \\
+&= \int \frac{\pr(\bfI|\bfW)\pr(\bfW|\theta')}{M} ~ \bfW ~ d\bfW,
+\end{align}
+and $M$ is a scalar that normalizes the probability. 
+Both $\pr(\bfI|\bfW)$ and $\pr(\bfW|\theta')$ given in \refEq{eq:pr-I-W} and \refEq{eq:likelihood}, respectively, are products of marginal probabilities of $\bfw_{jt}$. Therefore,
+the expectation of each $\bfw_{jt}$ can be computed separately. In particular, the expectation of each $\bfw_{jt}$ is efficiently approximated by sampling over the pixel grid.
+
+在最大化步骤中，计算以下内容：
+\begin{align}
+\theta \leftarrow &\argmax_{\theta} Q(\theta|\theta') \nonumber \\
+= &\argmin_{\theta} ~~ \mathcal{L}(\theta;\mathbb{E}\left[\bfW|\bfI,\theta'\right]) + \mathcal{R}(\theta),
+\end{align}
+which can be solved by \refAlg{alg:bcd}.
+
+The entire EM algorithm is summarized in \refAlg{alg:em} with the initialization scheme described next in \refSec{sec:initialization}.
+
+\begin{algorithm}[t]\label{alg:em}
+\LinesNumbered
+\caption{用于视频中姿势的EM算法。}
+\vspace{0.3em}
+\KwIn{$h_j(\cdot;\bfI_t),~ \forall j,t$ \tcp*[r]{\small heat maps}}
+\KwOut{$\theta=\{\bfC,\bfR,\bfT,\bfZ\}$ \tcp*[r]{\small pose parameters}}
+\vspace{0.3em}
+initialize the parameters \tcp*[r]{\small \refSec{sec:initialization}}
+\While{not converged}{
+$\theta'=\theta$\;
+\vspace{0.3em}
+\tcp{\small Compute the expectation of $\bfW$}
+$\mathbb{E}\left[\bfW|\bfI,\theta'\right] = \int \frac{1}{M}\pr(\bfI|\bfW)\pr(\bfW|\theta') ~ \bfW ~ d\bfW$\;
+\vspace{0.3em}
+\tcp{\small Update $\theta$ by \refAlg{alg:bcd}}
+$\theta = \argmin_{\theta} ~~ \mathcal{L}(\theta;\mathbb{E}\left[\bfW|\bfI,\theta'\right]) + \mathcal{R}(\theta)$ \;
+}
+\vspace{0.5em}
+\end{algorithm}
+
+\subsection{初始化和字典学习}\label{sec:initialization}
+
+A convex relaxation approach \cite{zhou20153d,zhou2015sparse} is used to initialize the parameters.
+This convex formulation was initially proposed for pose recovery in a single image frame given 
+%to solve the single frame pose estimation problem given 
+2D correspondences \cite{zhou20153d}, a special case of \refEq{eq:pmle}.
+
+凸松弛方法 \cite{zhou20153d,zhou2015sparse}用于初始化参数。
+最初提出这种凸形配方用于在给定的单个图像帧中进行姿势恢复\cite{zhou20153d}（给定了2D的对应关系）,是\refEq{eq:pmle}的一个特例。
+
+该方法后来扩展到处理2D对应异常值\cite{zhou2015sparse}。 如果给出2D姿势，则使用凸松弛分别为每个帧初始化模型参数\cite{zhou2015sparse}。
+
+或者，如果2D姿势未知，则对于每个关节，使用具有最大热图值的图像位置。
+接下来，应用来自\cite{zhou2015sparse}的鲁棒估计算法来初始化参数。
+字典学习算法\cite{zhou2015sparse}用于学习给定训练姿势数据的姿势字典。基于重建误差和计算效率之间的权衡，字典大小根据经验设置为行动特定字典的$K=64$和非行动特定情况的$K=128$。

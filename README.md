@@ -48,3 +48,51 @@
 本项目代码部分基于MIT协议开源
 
 学校标志与学校文件的版权归浙江大学所有
+
+## 开源许可
+这是我fork回来自己写论文用的,别用.
+
+## bugs
+```bash
+! LaTeX Error: Command \counterwithout already defined.
+               Or name \end... illegal, see p.192 of the manual.
+```
+
+[解决方法:](https://tex.stackexchange.com/questions/425600/latex-error-command-counterwithout-already-defined)
+```latex
+documentclass{article}
+\let\counterwithout\relax
+\let\counterwithin\relax
+\usepackage{chngcntr}
+
+\begin{document}
+
+\end{document}
+```
+发现不好使,出现问题的原因是`chngcntr`库里面定义的这两个已经在新版的LaTeX里面定义过了,所以会出现重定义的问题,hack近库文件把`\newcommand`改为`\renewcommand`,或者在某个地方去掉这个包的依赖.
+
+官方issue里面提到了这个问题,通过升级包解决.
+
+
+字体缺失
+```bash
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! fontspec error: "font-not-found"
+!
+! The font "FangSong" cannot be found.
+!
+! See the fontspec documentation for further information.
+!
+! For immediate help type H <return>.
+```
+复制了一下字体过来
+
+bitlatex Error
+```bash
+! Package biblatex Error: Nested 'refsection' environment.
+
+See the biblatex package documentation for explanation.
+Type  H <return>  for immediate help.
+```
+

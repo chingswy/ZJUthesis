@@ -1,0 +1,16 @@
+%!TEX root = main.tex
+根据以前的工作，我们提出的方法通过以下方式推进了最新技术。
+首先，与预测方法(e.g., \cite{li2015maximum,tekin2015predicting})相比，我们的方法不需要MoCap系统捕获的同步2D-3D数据。所提出的方法仅需要容易获得的带标注的2D图像（例如，“在野外”的“MPII数据集”\cite{andriluka14cvpr}）来训练CNN部件检测器和用于姿势字典的单独的3D MoCap数据集（例如，CMU MoCap数据库）。使用单独的训练数据源的灵活性使得所提出的方法更加广泛适用。
+与基于示例的方法(e.g., \cite{jiang20103d,yasin2016dual})）相比，所提出的方法不需要存储和枚举所有可能的2D视图，并且可以推广到没有见过的姿势。
+与其他3D重建方法(e.g., \cite{jiang20103d,yasin2016dual})相比，所提出的方法不依赖于在重建之前的2D的强对应关系，并且能够考虑到姿势的不确定性。
+与使用模型-图像对准(e.g., \cite{guan2009estimating,sigal2012loose,bogo2016keep})的现有工作相比，当前方法利用CNN来学习更好的2D表示，通过稀疏表达驱动的3D姿态优化能够得到有效的和全局的推断。
+最后，经验评估表明，与现有方法相比，所提出的方法更准确。
+
+
+特别地，在提供2D关节位置的情况下，我们所提出的方法超过了Human3.6M数据集\cite{ionescu2014human}上的现有技术NRSFM方法\cite{dai2012simple}的准确度。在2D关节未知的情况下，HumanEva I\cite{sigal2010humaneva}，Human3.6M\cite{ionescu2014human}和KTH Football II数据集\cite{kazemi2013multi}的实验结果证明了，我们的方法提升了目前公开的方法的结果。此外，MPII数据集 \cite{andriluka14cvpr} 的定性结果表明，所提出的方法能够从单个“野外”图像重建3D姿态，其中3D姿势事先从单独的MoCap数据集中学习。
+
+这项工作的初步版本出现在CVPR 2016\cite{zhou2016sparseness}中。在这里，之前的工作扩展了以下部分：
+所提出的方法集成了透视相机模型（相对于正交相机模型），并引入了相应的优化算法，使用最先进的2D姿态检测器，并且实验结果得到提高，使其更加全面。
+该代码位于\ url {https://github.com/daniilidis-group/monocap}。
+
+
