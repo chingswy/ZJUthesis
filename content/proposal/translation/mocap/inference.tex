@@ -1,11 +1,11 @@
 %!Tex root = main.tex
 
-在本节中，我们描述了我们的3D姿态推理方法。 在这里，区分了两种情况：(i) 提供了关节的图像位置 (Section\ \ref{sec:known}), 以及
-(ii) 关节位置未知 (Section \ref{sec:unknown}).
+在本节中，我们描述了我们的三维姿势推理方法。 在这里，区分了两种情况：(i) 提供了关节的图像位置 (\ref{sec:known}节中), 以及
+(ii) 关节位置未知 (\ref{sec:unknown}节中).
 
 \subsection{提供了关节的位置}\label{sec:known}
 
-When the 2D poses, $\bfW$, are given, the model parameters, $\theta$, are recovered via penalized maximum likelihood estimation (MLE):
+当二维姿势$\bfW$已经给定了，模型参数 $\theta$通过惩罚极大似然估计(MLE)来获得:
 \begin{align}\label{eq:pmle}
 \theta^* &= \argmax_{\theta} ~ \ln\pr(\bfW|\theta) - \mathcal{R}(\theta) \nonumber \\
 & = \argmin_{\theta} ~ \mathcal{L}(\theta;\bfW) + \mathcal{R}(\theta).
@@ -16,20 +16,21 @@ When the 2D poses, $\bfW$, are given, the model parameters, $\theta$, are recove
 
 在正交模型下，损失函数在\refEq{eq:loss}中给出，并且每次迭代中的更新规则在下面给出。
 
-The update of $\bfC$ needs to solve:
+参数 $\bfC$ 的更新需要解:
 \begin{align}\label{eq:C-step}
 \bfC \leftarrow \argmin_{\bfC} ~~ \mathcal{L}(\bfC;\bfW) + \alpha\|\bfC\|_1 + \frac{\beta}{2}\|\nabla_t\bfC\|_F^2,
 \end{align}
-where the objective is the composite of two differentiable functions plus an $\ell_1$ penalty. The problem in \refEq{eq:C-step} is solved by accelerated proximal gradient (APG) \cite{nesterov2007gradient}.
-Since the problem in \refEq{eq:C-step}  is convex, global optimality is guaranteed. 
+其中目标函数是两个可微的函数加上一个$\ell_1$组成。
+\refEq{eq:C-step}中的问题通过加速近似梯度解(APG) \cite{nesterov2007gradient}.
+由于式\refEq{eq:C-step}中的问题是凸的，因此可以求得全局最优解。 
 
-The update of $\bfR$ needs to solve:
+参数 $\bfR$ 的更新需要解:
 \begin{align}\label{eq:R-step}
 \bfR \leftarrow \argmin_{\bfR} ~~ \mathcal{L}(\bfR;\bfW) + \frac{\gamma}{2}\|\nabla_t\bfR\|_F^2,
 \end{align}
-如果目标是可微的，并且变量被旋转限制为$SO(3)$。 这里，采用流形优化来使用Manopt工具箱中的信赖域求解器更新旋转\cite{boumal2014manopt}.
+如果目标是可微的，并且变量被旋转限制为$SO(3)$。 这里，采用流形优化的方法，使用Manopt工具箱中的信赖域求解器更新旋转参数\cite{boumal2014manopt}.
 
-The update of $\bfT$ has the following closed-form solution:
+参数 $\bfT$ 的更新有以下闭式解:
 \begin{align}\label{eq:T-step}
 \bfT_t \leftarrow \mbox{row mean}\left\{\bfW_t - \bfR_t\bfS_t\right\}.
 \end{align}
@@ -39,14 +40,14 @@ The update of $\bfT$ has the following closed-form solution:
 
 在透视模型下，损失函数在\refEq{eq:loss-fp}中给出，并且每次迭代中的更新规则在下面给出。
 
-The update rules for $\bfC$ and $\bfR$ have the same forms as the orthographic case given in \refEq{eq:C-step} and \refEq{eq:R-step}, respectively.
+参数$\bfC$ 和 $\bfR$ 与平行相机投影更新规则相同，式\refEq{eq:C-step} 和 \refEq{eq:R-step}中给出。
 
-The update of $\bfT$ has the following closed-form solution:
+参数 $\bfT$ 的更新有以下闭式解:
 \begin{align}\label{eq:T-step-fp}
 \bfT_t \leftarrow \mbox{row mean}\left\{\bfK^{-1}\bfW_t\bfZ_t - \bfR_t\bfS_t\right\}.
 \end{align}
 
-The update of $\bfZ$ is also closed-form. Suppose $z_{it}$ denotes the $i$-th diagonal element of $\bfZ_t$, $\bfu_{it}$ the $i$-th column of $\bfK^{-1}\bfW_t$, and $\bfv_{it}$ the $i$-th column of $\bfR_t\bfS_t+\bfT_t\bfone^\top$. Then the solution for each $z_{it}$ is  
+参数 $\bfZ$ 的更新也是闭式的. 假设 $z_{it}$ 代表$\bfZ_t$中第 $i$个对角线元素, $\bfu_{it}$ 表示$\bfK^{-1}\bfW_t$的第$i$列，$\bfv_{it}$表示$\bfR_t\bfS_t+\bfT_t\bfone^\top$的第$i$列。那么每个$z_{it}$ 的解为 
 \begin{align}\label{eq:Z-step}
 z_{it}\leftarrow 
 \begin{cases}
@@ -61,16 +62,16 @@ z_{it}\leftarrow
 \LinesNumbered
 \caption{在正交投影或透视投影相机模型下，块坐标下降解\refEq{eq:pmle}}
 \vspace{0.3em}
-\KwIn{$\bfW$ \tcp*[r]{\small 2D joint locations}}
-\KwOut{$\theta$ \tcp*[r]{\small 3D pose parameters}}
+\KwIn{$\bfW$ \tcp*[r]{\small 2D关节位置}}
+\KwOut{$\theta$ \tcp*[r]{\small 3D姿势参数}}
 \vspace{0.3em}
-initialize the parameters \tcp*{\small \refSec{sec:initialization}}
-\While{not converged}{
+初始化参数 \tcp*{\small \refSec{sec:initialization}}
+\While{未收敛}{
 update $\bfC$ by \refEq{eq:C-step} with APG \;
 update $\bfR$ by \refEq{eq:R-step} with Manopt \;
-update $\bfT$ by \refEq{eq:T-step} if using orthographic model \\
-~~~~~~~~~~~~or by \refEq{eq:T-step-fp} if using perspective model \;
-update $\bfZ$ by \refEq{eq:Z-step} if using perspective model \;
+update $\bfT$ by \refEq{eq:T-step} if 使用正交模型 \\
+~~~~~~~~~~~~or by \refEq{eq:T-step-fp} if 使用透视模型 \;
+update $\bfZ$ by \refEq{eq:Z-step} if 使用透视模型  \;
 }
 \end{algorithm}
 

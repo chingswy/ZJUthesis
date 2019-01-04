@@ -5,13 +5,11 @@
 \begin{align}\label{eq:shape-model}
     \bfS_t = \sum_{i=1}^{k} c_{it}\bfB_i,
 \end{align}
-其中$\bfB_i\in\RR{3}{p}$ 表示一组姿势基， $c_{it}$ 表示相应的权重. 基础姿势是从MoCap数据集提供的训练姿势中学习的。
+其中$\bfB_i\in\RR{3}{p}$ 表示一组姿势基(basis poses)， $c_{it}$ 表示相应的权重. 姿势基(basis poses)是从MoCap数据集提供的训练姿势中学习的。
 
-传统的活动形状模型\cite{cootes1995}中基相对较小，我们没有采用，而是使用稀疏表示的方法，这种方法已经在最近的工作中显示为能够对人体姿势的大变化进行建模，例如\cite{ramakrishna2012reconstructing,akhter2015pose,zhou2015sparse}.
+传统的活动形状模型(active shape model)\cite{cootes1995}中基相对较小，我们没有采用，而是使用稀疏表示的方法，这种方法已经在最近的工作中显示为能够对人体姿势的大变化进行建模，例如\cite{ramakrishna2012reconstructing,akhter2015pose,zhou2015sparse}.
 
-也就是说一个完整的字典 $\{\bfB_1,\cdots,\bfB_k\}$,是从一个相对较大的姿势几何中学习得到的,其中系数为 $k$, 假设 $c_{it}$是稀疏的. 在本文的其余部分，
-%$\bfc_t$ denotes the coefficient vector $[c_{1t},\cdots,c_{kt}]^\top$ for frame $t$ and $\bfC$ denotes the matrix composed of all $\bfc_{t}$.
-$\bfc_t = [c_{1t},\cdots,c_{kt}]^\top$ 表示帧 $t$的系数向量，$\bfC$ 为由所有的 $\bfc_{t}$组成的矩阵。
+也就是说一个完整(overcomplete)的字典 $\{\bfB_1,\cdots,\bfB_k\}$,是从一个相对较大的姿势集合$k$中学习得到的,其中系数为 $c_{it}$, 假设 $c_{it}$是稀疏的. 在本文的其余部分，$\bfc_t = [c_{1t},\cdots,c_{kt}]^\top$ 表示帧 $t$的系数向量，$\bfC$ 为由所有的 $\bfc_{t}$组成的矩阵。
 
 
 \subsection{2D和3D姿势之间的依赖性}
@@ -22,16 +20,13 @@ $\bfc_t = [c_{1t},\cdots,c_{kt}]^\top$ 表示帧 $t$的系数向量，$\bfC$ 为
 \begin{align}\label{eq:camera-model}
     \bfW_t = \bfR_t\bfS_t + \bfT_t\bfone^\top,
 \end{align}
-where $\bfW_t\in\RR{2}{p}$ denotes the 2D pose in frame $t$, and $\bfR_t\in\RR{2}{3}$ and $\bfT_t\in\R{2}$ the camera rotation and translation, respectively. In the following, $\bfW$, $\bfR$ and $\bfT$ denote the collections of $\bfW_t$, $\bfR_t$ and $\bfT_t$ for all $t$, respectively.
+其中 $\bfW_t\in\RR{2}{p}$ 表示第$t$帧中的2D姿势, $\bfR_t\in\RR{2}{3}$ 与 $\bfT_t\in\R{2}$依次表示相机的旋转与平移.在后文中, $\bfW$, $\bfR$ 与 $\bfT$ 分别表示所有帧$t$的 $\bfW_t$, $\bfR_t$ , $\bfT_t$ 集合.
 
-考虑到观测噪声和模型误差，给定3D姿态参数的2D姿态的条件分布被建模为
+考虑到观测噪声和模型误差，给定3D姿态参数，2D姿态的条件分布可以建模为
 \begin{align}\label{eq:likelihood}
 \pr(\bfW|\theta) \propto e^{-\mathcal{L}(\theta;\bfW)},
 \end{align}
-where $\theta=\{\bfC,\bfR,\bfT\}$ 是所有3D姿势参数的并集
-%where $\theta$ is the union of all the 3D pose parameters
-%$\theta=\{\bfC,\bfR,\bfT\}$
-and the loss function, $\mathcal{L}(\theta;\bfW)$, 被定义为
+其中 $\theta=\{\bfC,\bfR,\bfT\}$ 是所有3D姿势参数的并集。损失函数, $\mathcal{L}(\theta;\bfW)$的定义为
 \begin{align}\label{eq:loss}
 \mathcal{L}(\theta;\bfW) = \frac{\nu}{2}\sum_{t=1}^{n}\left\|\bfW_t - \bfR_t\sum_{i=1}^{k} c_{it}\bfB_i - \bfT_t\bfone^\top\right\|_F^2,
 \end{align}
@@ -50,18 +45,17 @@ and the loss function, $\mathcal{L}(\theta;\bfW)$, 被定义为
 \begin{align}\label{eq:model-fp}
     \bfK^{-1}\bfW_t\bfZ_t = \bfR_t\bfS_t + \bfT_t\bfone^\top,
 \end{align}
-where $\bfW_t\in\RR{3}{p}$ denotes the homogeneous coordinates of 2D joints, $\bfR_t\in\RR{3}{3}$ and $\bfT_t\in\R{3}$ are the rotation and translation in 3D, and $\bfZ_t\in\RR{p}{p}$ is a diagonal matrix with diagonal elements denoting the depth values of joints. Correspondingly, the loss function in the perspective case is defined as:
+其中 $\bfW_t\in\RR{3}{p}$ 表示2D关节的齐次坐标, $\bfR_t\in\RR{3}{3}$ 与 $\bfT_t\in\R{3}$ 表示3D空间中的旋转与平移, $\bfZ_t\in\RR{p}{p}$ 是一个对角矩阵，对角线上的值是关节的深度. 相应地, 透视情况下的损失函数定义为:
 \begin{align}\label{eq:loss-fp}\small
 \mathcal{L}(\theta;\bfW) = \frac{\nu}{2}\sum_{t=1}^{n}\left\|\bfK^{-1}\bfW_t\bfZ_t - \bfR_t\sum_{i=1}^{k} c_{it}\bfB_i - \bfT_t\bfone^\top\right\|_F^2,
 \end{align}
-where $\theta=\{\bfC,\bfR,\bfT,\bfZ\}$.
+其中 $\theta=\{\bfC,\bfR,\bfT,\bfZ\}$.
 
-请注意，最小化\refEq{eq:loss-fp}中的损失会产生一个简单的解决方案，其中所有变量由于透视模型中固有的尺度模糊而收敛到零。 为了避免这种简单的解决方案，通过在优化期间添加以下约束来强制执行根关节的深度：
-
+注意，最小化\refEq{eq:loss-fp}中的损失会产生一个简单的解，其中所有变量由于透视模型中固有的尺度模糊而收敛到零。 为了避免这种简单的解决方案，通过在优化期间添加以下约束来强制执行根关节的深度：
 \begin{align}
 z_{1t}=1,
 \end{align}
-where $z_{1t}$ denotes the first diagonal element of $\bfZ_t$ corresponding to the root joint.
+其中 $z_{1t}$ 表示 $\bfZ_t$ 中根节点的对角线上的第一个元素.
 
 \subsection{姿势和图像之间的依赖性}
 
@@ -69,22 +63,21 @@ where $z_{1t}$ denotes the first diagonal element of $\bfZ_t$ corresponding to t
 \begin{align}\label{eq:likelihood-complete}
 \pr(\bfI,\bfW|\theta) = \pr(\bfI|\bfW)\pr(\bfW|\theta),
 \end{align}
-where $\bfI=\{\bfI_1,\cdots,\bfI_n\}$ denotes the image data. The conditional distribution $\pr(\bfW|\theta)$ is given in \refEq{eq:likelihood}. We assume that the likelihood function $\pr(\bfI|\bfW)$ given the image data can be learned discriminatively using a CNN and written as
+其中 $\bfI=\{\bfI_1,\cdots,\bfI_n\}$ 表示图像数据. 条件分布 $\pr(\bfW|\theta)$ 由\refEq{eq:likelihood}. 我们假设由图片数据提供的似然函数 $\pr(\bfI|\bf W)$ 能够通过卷积网络学习得到，并且可以写为
 \begin{align}\label{eq:pr-I-W}
 \pr(\bfI|\bfW) \propto \Pi_{t}\Pi_{j}h_j(\bfw_{jt};\bfI_t),
 \end{align}
-where $\bfw_{jt}$ denotes the image location of joint $j$ in frame $t$, and $h_j(\cdot;\bfI_t)$ represents a mapping from an image $\bfI_t$ to the likelihood of the joint location (termed heat map).
-For each joint $j$, the mapping $h_j$ is approximated by a CNN (described in \refSec{sec:cnn}).
+其中 $\bfw_{jt}$ 表示关节 $j$在帧 $t$中的位置, $h_j(\cdot;\bfI_t)$ 表示从图片$\bfI_t$ 到关节位置的似然（热图表示）的映射.
+对于每个关节 $j$, 这个映射关系 $h_j$ 由卷积网络来进行近似 ( \refSec{sec:cnn} 中进行描述).
 
 \subsection{模型参数的先验}
 
-介绍了模型参数的以下惩罚函数：
+以下为模型参数的惩罚函数：
 \begin{align}\label{eq:prior}
 \mathcal{R}(\theta) = \alpha\|\bfC\|_1 + \frac{\beta}{2}\|\nabla_t\bfC\|_F^2 + \frac{\gamma}{2}\|\nabla_t\bfR\|_F^2,
 \end{align}
-where $\|\cdot\|_1$ denotes the $\ell_1$-norm (i.e., the sum of absolute values), $\nabla_t$ the discrete temporal derivative operator, and
-$\alpha, \beta, \gamma$ are scalar weights. 
-第一项惩罚姿势系数的基数以引起稀疏姿势表示。 第二和第三项对姿势系数和旋转施加一阶平滑约束。
-可以对翻译组件施加类似的平滑约束; 然而，根据经验，我们没有观察到其包含的明显性能差异。
+其中$\|\cdot\|_1$ 表示$\ell_1$-norm (即, 绝对值之和), $\nabla_t$ 表示离散的时域差分算符, $\alpha, \beta, \gamma$ 为数值权重. 
+第一项惩罚姿势系数的基，使得可以获得稀疏的姿势表示。 第二和第三项对姿势系数和旋转施加一阶平滑约束。
+可以对平移分量施加类似的平滑约束; 然而，从实验结果上看，我们没有观察到其明显的性能差异。
 
 
