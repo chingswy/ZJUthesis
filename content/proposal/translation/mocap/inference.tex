@@ -6,14 +6,14 @@
 \subsection{提供了关节的位置}\label{sec:known}
 
 当二维姿势$\bfW$已经给定了，模型参数 $\theta$通过惩罚极大似然估计(MLE)来获得:
-\begin{align}\label{eq:pmle}
+\begin{align}\label{eq:pmle} 
 \theta^* &= \argmax_{\theta} ~ \ln\pr(\bfW|\theta) - \mathcal{R}(\theta) \nonumber \\
 & = \argmin_{\theta} ~ \mathcal{L}(\theta;\bfW) + \mathcal{R}(\theta).
 \end{align}
  \refEq{eq:pmle} 中的问题通过块坐标下降来解决，即，在固定其他变量时交替更新一个变量块。
 
 \subsubsection{正投影模型}
-
+ 
 在正交模型下，损失函数在\refEq{eq:loss}中给出，并且每次迭代中的更新规则在下面给出。
 
 参数 $\bfC$ 的更新需要解:
@@ -58,9 +58,9 @@ z_{it}\leftarrow
 
 给出2D姿势的3D姿态推理的整个算法总结在\refAlg{alg:bcd}中。一旦目标值收敛，迭代就终止。由于在每个步骤中目标函数不增加，因此保证算法终止; 但是，由于\refEq{eq:pmle}中的问题是非凸的，因此该算法需要适当选择的初始化（在\refSec{sec:initialization}中描述）。
 
-\begin{algorithm}[t]\label{alg:bcd}
+\begin{algorithm}[t]
 \LinesNumbered
-\caption{在正交投影或透视投影相机模型下，块坐标下降解\refEq{eq:pmle}}
+\caption{在正交投影或透视投影相机模型下，块坐标下降解\refEq{eq:pmle}}\label{alg:bcd}
 \vspace{0.3em}
 \KwIn{$\bfW$ \tcp*[r]{\small 2D关节位置}}
 \KwOut{$\theta$ \tcp*[r]{\small 3D姿势参数}}
@@ -82,7 +82,7 @@ update $\bfZ$ by \refEq{eq:Z-step} if 使用透视模型  \;
 \begin{align}
 \pr(\bfI|\theta) = \int\pr(\bfI,\bfW|\theta)d\bfW, \label{eq:marginalization}
 \end{align}
-where $\pr(\bfI,\bfW|\theta)$ is given in \refEq{eq:likelihood-complete}.
+其中 $\pr(\bfI,\bfW|\theta)$ 在式 \refEq{eq:likelihood-complete}中给出.
 
 (\ref{eq:marginalization}) 的直接边缘化是难以处理的。
 相反，开发EM算法来计算惩罚的MLE。
@@ -98,28 +98,27 @@ where $\pr(\bfI,\bfW|\theta)$ is given in \refEq{eq:likelihood-complete}.
 \begin{align}\label{eq:der1}
 \int \mathcal{L}(\theta;\bfW) \pr(\bfW|\bfI,\theta') d\bfW = \mathcal{L}(\theta;\mathbb{E}\left[\bfW|\bfI,\theta'\right]) + \mbox{const},
 \end{align}
-where $\mathbb{E}\left[\bfW|\bfI,\theta'\right]$ is the expectation of $\bfW$ given $\bfI$ and $\theta'$:
+其中$\mathbb{E}\left[\bfW|\bfI,\theta'\right]$ 给定$\bfI$和$\theta'$时 $\bfW$ 的期望:
 \begin{align}\label{eq:der2}
 \mathbb{E}\left[\bfW|\bfI,\theta'\right]
 &= \int \pr(\bfW|\bfI,\theta')~ \bfW ~ d\bfW \nonumber \\
 &= \int \frac{\pr(\bfI|\bfW)\pr(\bfW|\theta')}{M} ~ \bfW ~ d\bfW,
 \end{align}
-and $M$ is a scalar that normalizes the probability. 
-Both $\pr(\bfI|\bfW)$ and $\pr(\bfW|\theta')$ given in \refEq{eq:pr-I-W} and \refEq{eq:likelihood}, respectively, are products of marginal probabilities of $\bfw_{jt}$. Therefore,
-the expectation of each $\bfw_{jt}$ can be computed separately. In particular, the expectation of each $\bfw_{jt}$ is efficiently approximated by sampling over the pixel grid.
+$M$是归一化概率的一个标量。 
+$\pr(\bfI|\bfW)$ 和 $\pr(\bfW|\theta')$ 都在\refEq{eq:pr-I-W} ，\refEq{eq:likelihood}中相应给出, 并且都是 $\bfw_{jt}$的积. 因此,每个 $\bfw_{jt}$的期望都能够分别计算出来。特别地,  $\bfw_{jt}$ 的期望可以通过在像素上采样高效的近似计算。
 
 在最大化步骤中，计算以下内容：
 \begin{align}
 \theta \leftarrow &\argmax_{\theta} Q(\theta|\theta') \nonumber \\
 = &\argmin_{\theta} ~~ \mathcal{L}(\theta;\mathbb{E}\left[\bfW|\bfI,\theta'\right]) + \mathcal{R}(\theta),
 \end{align}
-which can be solved by \refAlg{alg:bcd}.
+这能通过\refAlg{alg:bcd}解出来.
 
-The entire EM algorithm is summarized in \refAlg{alg:em} with the initialization scheme described next in \refSec{sec:initialization}.
+完整的EM算法在 \refAlg{alg:em}中进行了总结，其中包含了下一节给定$\bfI$和$\theta'$中描述的初始化算法。
 
-\begin{algorithm}[t]\label{alg:em}
+\begin{algorithm}[t]
 \LinesNumbered
-\caption{用于视频中姿势的EM算法。}
+\caption{用于视频中姿势的EM算法。}\label{alg:em}
 \vspace{0.3em}
 \KwIn{$h_j(\cdot;\bfI_t),~ \forall j,t$ \tcp*[r]{\small heat maps}}
 \KwOut{$\theta=\{\bfC,\bfR,\bfT,\bfZ\}$ \tcp*[r]{\small pose parameters}}
@@ -136,13 +135,8 @@ $\theta = \argmin_{\theta} ~~ \mathcal{L}(\theta;\mathbb{E}\left[\bfW|\bfI,\thet
 }
 \vspace{0.5em}
 \end{algorithm}
-
+ 
 \subsection{初始化和字典学习}\label{sec:initialization}
-
-A convex relaxation approach \cite{zhou20153d,zhou2015sparse} is used to initialize the parameters.
-This convex formulation was initially proposed for pose recovery in a single image frame given 
-%to solve the single frame pose estimation problem given 
-2D correspondences \cite{zhou20153d}, a special case of \refEq{eq:pmle}.
 
 凸松弛方法 \cite{zhou20153d,zhou2015sparse}用于初始化参数。
 最初提出这种凸形配方用于在给定的单个图像帧中进行姿势恢复\cite{zhou20153d}（给定了2D的对应关系）,是\refEq{eq:pmle}的一个特例。

@@ -1,10 +1,10 @@
 %!TEX root = main.tex
 
-\subsection{Datasets}
+\subsection{数据集}
 
 \begin{table*}
 \footnotesize
-\caption{Mean per joint errors (mm) on Human3.6M \cite{ionescu2014human} given 2D joints.}\label{tab:hm36m_rec}
+\caption{平均关节误差(mm) on Human3.6M \cite{ionescu2014human} 给定2D位置}\label{tab:hm36m_rec}
 \centering
 % \renewcommand{\arraystretch}{0.3}
 % \begin{tabularx}{l*{15}{c}}
@@ -39,7 +39,7 @@ Persp.  & 68.3 &         91.4 &         66.8 &         75.0 &         67.0 &    
 % \end{table}
 
 \begin{table}
-\caption{Mean reconstruction errors (mm) on Human3.6M \cite{ionescu2014human} given 2D joints.}\label{tab:nrsfm}
+\caption{平均重建误差 (mm) on Human3.6M \cite{ionescu2014human} 给定关节位置.}\label{tab:nrsfm}
 \centering
 \renewcommand{\arraystretch}{1.5}
 \begin{tabular}{l*{15}{c}}
@@ -56,14 +56,14 @@ Protocol II & - & - & - & 70.5 & 55.1 & 54.6 \\
 \subsection{Evaluation metric} % (fold)
 \label{sub:evaluation_metric}
 
-Given a set of estimated 3D joint locations $\hat\bfx_1,\cdots,\hat\bfx_n$ and the corresponding ground-truth locations $\bfx_1^*,\cdots,\bfx_n^*$ in the same coordinates, the \textbf{per joint error} is defined as the average Euclidean distance over all the joints:
+给定3D关节位置$\hat\bfx_1,\cdots,\hat\bfx_n$ 与对应的真实位置$\bfx_1^*,\cdots,\bfx_n^*$ ， \textbf{per joint error} 的定义是所有关节的欧式距离的均值:
 \begin{align}\label{eq:pje}
 e = \frac{1}{n}\sum_{i=1}^n\|\hat\bfx_i-\bfx_i^*\|_2.
 \end{align}
 
 请注意，上述指标取决于估计结构的绝对姿态，包括比例，平移和方向。 尺度和深度模糊是单眼重建所固有的，并且通常无法解决。 该尺度直接从基于预测的方法的训练对象中学习\cite{ionescu2014human,li2015maximum,tekin2015predicting}。 为了公平比较，我们的重建输出被缩放，使得平均肢长与所有训练对象的平均值相同。 作为Human3.6M和HumanEva数据集中的标准协议，比较骨架的根位置是对齐的，以使评估转换不变。 %请注意，不允许Procrustes与基础事实保持一致。
 
-The \textbf{reconstruction error} is defined as the 3D per joint error up to a similarity transformation, $\mathcal{T}$:
+\textbf{reconstruction error} 为通过相似变换之后的3D关节误差, $\mathcal{T}$:
 \begin{align*}
 r = \min_{\mathcal{T}}\frac{1}{n}\sum_{i=1}^n\|\hat\bfx_i-\mathcal{T}(\bfx_i^*)\|_2,
 \end{align*}
@@ -120,9 +120,11 @@ Fine-tuned+specific w/o smooth &         76.0 &        112.2 &         74.2 &   
 \end{table*}
 
 \begin{table*}
+  \footnotesize
 \caption{Human3.6M上的平均重建误差（mm） \cite{ionescu2014human}.}
 \centering
-\renewcommand{\arraystretch}{1.35}
+\renewcommand{\arraystretch}{0.5}
+\renewcommand{\tabcolsep}{0.1 mm}
 \begin{tabular}{l*{15}{c}}
 \toprule
  & Directions & Discussion & Eating & Greeting & Phoning & Photo & Posing & Purchases \\
@@ -146,9 +148,11 @@ Fine-tuned+nonspecific & 60.1 &         81.5 &         53.2 &         49.7 &    
 \end{table*}
 
 \begin{table*}
+\footnotesize
 \caption{Human3.6M在线测试集上的平均关节误差(``H36M\_NOS10'') \cite{ionescu2014human}.}
 \centering
-\renewcommand{\arraystretch}{1.35}
+\renewcommand{\arraystretch}{0.5}
+\renewcommand{\tabcolsep}{0.1 mm}
 \begin{tabular}{l*{15}{c}}
 \toprule
  & Directions & Discussion &	Eating &	Greeting &	Phoning &	Posing &	Purchases &	Sitting \\
@@ -172,50 +176,52 @@ Proposed & 114  &   83	& 101 &	91 &	64	& 87	& 71 &           86\\
 Human3.6M \cite{ionescu2014human}是最近用于3D人体感知的大型数据集。 它包括从MoCap系统获取的数百万个3D人体姿势以及来自校准相机的相应图像。
 此设置提供同步视频和2D-3D姿势数据以供评估。 它包括11个主题，执行15个动作，如吃饭，坐着和走路。 使用与先前工作相同的数据分区协议\cite{li2015maximum，tekin2015predicting}：来自五个类别（S1，S5，S6，S7，S8）的数据用于训练，并且来自两个类别的数据（S9，S11） ）用于测试。 原始帧速率为50 fps，并下采样为10 fps。
 
-\subsubsection{具有已知2D姿势的3D姿势重建}
+% \subsubsection{具有已知2D姿势的3D姿势重建}
  
-首先，给出了具有已知2D姿势的所提出方法的3D可重构性的评估。 通过序列的2D对应的3D重建的通用方法是NRSFM。 将所提出的方法与人类3.6M上的NRSFM \cite{dai2012simple}中的最新技术进行了比较。 最近的单视图姿势重建方法，投影匹配追踪（PMP）\cite{ramakrishna2012reconstructing}，以及我们的管道中使用的初始化方法\cite{zhou2015sparse}也包括在比较中。
+% 首先，给出了具有已知2D姿势的所提出方法的3D可重构性的评估。 通过序列的2D对应的3D重建的通用方法是NRSFM。 将所提出的方法与人类3.6M上的NRSFM \cite{dai2012simple}中的最新技术进行了比较。 最近的单视图姿势重建方法，投影匹配追踪（PMP）\cite{ramakrishna2012reconstructing}，以及我们的管道中使用的初始化方法\cite{zhou2015sparse}也包括在比较中。
 
-All sequences of S9 and S11 in Human3.6M were used for evaluation. A single pose dictionary from all the training pose data, irrespective of the action type, was used, i.e., a non-action specific dictionary. Dai et al.'s approach \cite{dai2012simple} requires a predefined rank $K$.  Various values of $K$ were considered with the best result for each sequence reported.
+% All sequences of S9 and S11 in Human3.6M were used for evaluation. A single pose dictionary from all the training pose data, irrespective of the action type, was used, i.e., a non-action specific dictionary. Dai et al.'s approach \cite{dai2012simple} requires a predefined rank $K$.  Various values of $K$ were considered with the best result for each sequence reported.
 
-The per joint errors for each action are presented in \refTab{tab:hm36m_rec}, while the reconstruction errors are summarized in \refTab{tab:nrsfm}. In \refTab{tab:nrsfm}, Protocol I means the protocol introduced above in this paper, and Protocol II is the one proposed in \cite{yasin2016dual} where only S11 and 14 joints are used in evaluation. The proposed approach  with a perspective model (``Persp.") outperforms its orthographic counterpart (``Orth.") by a large margin in terms of per joint error.
-This performance difference is mostly due to the inaccuracy of rigid pose estimation with the orthographic model, which greatly increases the per joint error as Procrustes alignment is not allowed in the evaluation. Moreover, the orthographic model may suffer from a reflection ambiguity.  
-In terms of reconstruction error which ignores rigid pose, the difference between the perspective and orthographic models is much smaller.
+% The per joint errors for each action are presented in \refTab{tab:hm36m_rec}, while the reconstruction errors are summarized in \refTab{tab:nrsfm}. In \refTab{tab:nrsfm}, Protocol I means the protocol introduced above in this paper, and Protocol II is the one proposed in \cite{yasin2016dual} where only S11 and 14 joints are used in evaluation. The proposed approach  with a perspective model (``Persp.") outperforms its orthographic counterpart (``Orth.") by a large margin in terms of per joint error.
+% This performance difference is mostly due to the inaccuracy of rigid pose estimation with the orthographic model, which greatly increases the per joint error as Procrustes alignment is not allowed in the evaluation. Moreover, the orthographic model may suffer from a reflection ambiguity.  
+% In terms of reconstruction error which ignores rigid pose, the difference between the perspective and orthographic models is much smaller.
 
-``Orth." performs slightly better than the initialization approach \cite{zhou2015sparse}. Note, given the 2D joints, 
-%if the 2D joints are given, 
-``Orth." reduces to the initialization approach 
-%\cite{zhou2015sparse} 
-combined with temporal smoothness constraints.
+% ``Orth." performs slightly better than the initialization approach \cite{zhou2015sparse}. Note, given the 2D joints, 
+% %if the 2D joints are given, 
+% ``Orth." reduces to the initialization approach 
+% %\cite{zhou2015sparse} 
+% combined with temporal smoothness constraints.
 
-The proposed approach also outperforms the NRSFM baseline  \cite{dai2012simple}. The main reason is that the videos are captured by stationary cameras. Although the subject is occasionally rotating, the ``baseline" between frames is generally small, and neighboring views provide insufficient geometric constraints for 3D reconstruction. In other words, NRSFM is very difficult to solve in the case of slow camera motion. This observation is consistent with prior findings in the NRSFM literature, e.g., \cite{akhter2011trajectory}. In this case, the structure prior (even a non-action specific one) learned from existing MoCap data is critical for reconstruction.
+% The proposed approach also outperforms the NRSFM baseline  \cite{dai2012simple}. The main reason is that the videos are captured by stationary cameras. Although the subject is occasionally rotating, the ``baseline" between frames is generally small, and neighboring views provide insufficient geometric constraints for 3D reconstruction. In other words, NRSFM is very difficult to solve in the case of slow camera motion. This observation is consistent with prior findings in the NRSFM literature, e.g., \cite{akhter2011trajectory}. In this case, the structure prior (even a non-action specific one) learned from existing MoCap data is critical for reconstruction.
 
-\subsubsection{3D pose reconstruction with unknown 2D pose}
+% \subsubsection{3D pose reconstruction with unknown 2D pose}
 
-Next, results on the Human3.6M dataset are reported when 2D poses are predicted from images using the CNN described in \refSec{sec:cnn}. The proposed approach is compared to several recent baselines including both discriminative approaches (e.g., \cite{ionescu2014human,li2015maximum,tekin2015predicting}) and two-stage reconstruction approaches (e.g., \cite{bogo2016keep}). For the proposed approach, four combinations of training data sources were considered -- the generic hourglass model trained on MPII (``generic'') or the fine-tuned model trained on Human3.6M (``fine-tuned'') combined with the nonspecific dictionary learned with all 3D pose data (``nonspecific'') or the dictionary learned with action specific pose data (``specific'').
+% Next, results on the Human3.6M dataset are reported when 2D poses are predicted from images using the CNN described in \refSec{sec:cnn}. The proposed approach is compared to several recent baselines including both discriminative approaches (e.g., \cite{ionescu2014human,li2015maximum,tekin2015predicting}) and two-stage reconstruction approaches (e.g., \cite{bogo2016keep}). For the proposed approach, four combinations of training data sources were considered -- the generic hourglass model trained on MPII (``generic'') or the fine-tuned model trained on Human3.6M (``fine-tuned'') combined with the nonspecific dictionary learned with all 3D pose data (``nonspecific'') or the dictionary learned with action specific pose data (``specific'').
 
-The mean per joint errors are summarized in \refTab{tab:h36m}. The table shows that the proposed approach outperforms the baselines on most of the actions, yielding a much lower average error compared to the baselines. The ``walk" and ``walk together" sequences involve very predictable and repetitive motions. This might favor the direct regression approach \cite{tekin2015predicting}. The reconstruction errors are provided in \refTab{tab:h36m1}. The proposed approach with a generic 2D pose detector outperforms SMPLify \cite{bogo2016keep}, which is the state-of-the-art two-stage approach that reconstructs 3D poses by fitting a parametric body shape model to 2D joints detected by a CNN-based 2D pose detector.
+% The mean per joint errors are summarized in \refTab{tab:h36m}. The table shows that the proposed approach outperforms the baselines on most of the actions, yielding a much lower average error compared to the baselines. The ``walk" and ``walk together" sequences involve very predictable and repetitive motions. This might favor the direct regression approach \cite{tekin2015predicting}. The reconstruction errors are provided in \refTab{tab:h36m1}. The proposed approach with a generic 2D pose detector outperforms SMPLify \cite{bogo2016keep}, which is the state-of-the-art two-stage approach that reconstructs 3D poses by fitting a parametric body shape model to 2D joints detected by a CNN-based 2D pose detector.
 
-Comparing the results using different sources of training data, a remarkable improvement was achieved by using the fine-tuned 2D pose detector and the action specific 3D pose dictionaries. Nevertheless, the proposed approach with the generic detector and non-action specific dictionary still attained very competitive performance compared to the state-of-the-art. Note that the proposed approach can also be applied to single frames without temporal smoothness, with corresponding results presented in the last row of \refTab{tab:h36m}. 
+% Comparing the results using different sources of training data, a remarkable improvement was achieved by using the fine-tuned 2D pose detector and the action specific 3D pose dictionaries. Nevertheless, the proposed approach with the generic detector and non-action specific dictionary still attained very competitive performance compared to the state-of-the-art. Note that the proposed approach can also be applied to single frames without temporal smoothness, with corresponding results presented in the last row of \refTab{tab:h36m}. 
 
-\subsubsection{Human3.6M online test set}
-\refTab{tab:h36m_test} presents results on the Human3.6M online test set ``H36M\_NOS10''.  The test set includes 360 sequences from three subjects with hidden ground truth. As the standard protocol, all compared approaches used action specific training. 
-We used the fine-tuned hourglass model and action specific dictionaries. The results show that the proposed approach achieves significant improvements for all actions compared to the previous approaches.
+% \subsubsection{Human3.6M online test set}
+% \refTab{tab:h36m_test} presents results on the Human3.6M online test set ``H36M\_NOS10''.  The test set includes 360 sequences from three subjects with hidden ground truth. As the standard protocol, all compared approaches used action specific training. 
+% We used the fine-tuned hourglass model and action specific dictionaries. The results show that the proposed approach achieves significant improvements for all actions compared to the previous approaches.
 
-\subsubsection{Ablative analysis}
+% \subsubsection{Ablative analysis}
 
-\refTab{tab:steps} shows the impact of each component in our approach. For our approach, the 2D pose estimates were obtained from the expectations of their posterior distributions given in \refEq{eq:der2}. Note that the 2D errors are with respect to the normalized bounding box size $256\times256$. Two cases of 2D input were considered: heat maps from the generic detector (less accurate), and the fine-tuned detector (more accurate).  In this evaluation, action specific pose dictionaries and the Stacked Hourglass for joint heat map prediction were used.%  in our evaluation.
+% \refTab{tab:steps} shows the impact of each component in our approach. For our approach, the 2D pose estimates were obtained from the expectations of their posterior distributions given in \refEq{eq:der2}. Note that the 2D errors are with respect to the normalized bounding box size $256\times256$. Two cases of 2D input were considered: heat maps from the generic detector (less accurate), and the fine-tuned detector (more accurate).  In this evaluation, action specific pose dictionaries and the Stacked Hourglass for joint heat map prediction were used.%  in our evaluation.
 
-\refTab{tab:steps} suggests that, for the same model, both the 3D and 2D errors increase significantly if EM is not applied.  This indicates the importance of marginalizing the 2D uncertainty. Removing the smoothness constraint also increases the error, while the difference is more apparent when the 2D input is more noisy (from the ``generic" detector). The perspective model always outperforms the orthographic model %, but the 
-with the gap in terms of per joint error being much larger than that of reconstruction error.  This indicates that the performance gain using a perspective camera model is mainly due to the more accurate rigid pose estimation. Finally, with the same orthographic model, the proposed approach clearly improves the initial solution \cite{zhou2015sparse} by taking advantage of EM and smoothness.
+% \refTab{tab:steps} suggests that, for the same model, both the 3D and 2D errors increase significantly if EM is not applied.  This indicates the importance of marginalizing the 2D uncertainty. Removing the smoothness constraint also increases the error, while the difference is more apparent when the 2D input is more noisy (from the ``generic" detector). The perspective model always outperforms the orthographic model %, but the 
+% with the gap in terms of per joint error being much larger than that of reconstruction error.  This indicates that the performance gain using a perspective camera model is mainly due to the more accurate rigid pose estimation. Finally, with the same orthographic model, the proposed approach clearly improves the initial solution \cite{zhou2015sparse} by taking advantage of EM and smoothness.
 
-An alternative to the proposed EM algorithm is the maximum a posteriori (MAP) estimation which minimizes $-\ln\pr(\bfI,\bfW|\theta)+\mathcal{R}(\theta)$ over $\theta$ and $\bfW$. We implemented the block coordinate descent to solve the MAP estimation. With the fine-tuned detector, the mean per joint error of MAP is 79.3 mm, which is worse than that of EM (77.8 mm).
+% An alternative to the proposed EM algorithm is the maximum a posteriori (MAP) estimation which minimizes $-\ln\pr(\bfI,\bfW|\theta)+\mathcal{R}(\theta)$ over $\theta$ and $\bfW$. We implemented the block coordinate descent to solve the MAP estimation. With the fine-tuned detector, the mean per joint error of MAP is 79.3 mm, which is worse than that of EM (77.8 mm).
 
 
 \begin{table}
+  \footnotesize
 \caption{不同的方法的估计误差。 “PJ”，“Rec”和“2D”分别对应于每个关节误差（mm），重建误差（mm）和2D误差（像素）。}
 \centering
-\renewcommand{\arraystretch}{1.5}
+\renewcommand{\arraystretch}{0.5}
+\renewcommand{\tabcolsep}{0.1 mm}
 \begin{tabular}{l*{15}{c}}
 \toprule
 & \multicolumn{3}{c}{Generic} & \multicolumn{3}{c}{Fine-tuned} \\
@@ -240,29 +246,6 @@ w/o smooth/EM  \cite{zhou2015sparse} & 127.3 & 67.2 & 11.3 & 100.5 & 58.2 & 6.5 
   \includegraphics[width=0.32\linewidth]{figures/beta.pdf} \hfill
   \includegraphics[width=0.32\linewidth]{figures/gamma.pdf}
   \caption{对模型参数的敏感性。 分别显示平均重建误差与模型参数$\alpha$，$\beta$或$\gamma$的关系。}\label{fig:par}
-\end{figure}
-
-\begin{figure} \centering
-  \subfigure[figure 1 title.] { \label{fig:a}
-  \includegraphics[width=0.2\columnwidth]{figures/alpha.pdf}
-  }
-  \subfigure[figure 2 title.] { \label{fig:b}
-  \includegraphics[width=0.2\columnwidth]{figures/beta.pdf}
-  }
-  \subfigure[figure 3 title.] { \label{fig:b}
-  \includegraphics[width=0.2\columnwidth]{figures/gamma.pdf}
-  }
-  \subfigure[figure 4 title.] { \label{fig:b}
-  \includegraphics[width=0.2\columnwidth]{figures/gamma.pdf}
-  }
-  \subfigure[figure 5 title.] { \label{fig:b}
-  \includegraphics[width=0.3\columnwidth]{figures/examples/h36m/S9-1.pdf}
-  }
-  \subfigure[figure 6 title.] { \label{fig:b}
-  \includegraphics[width=0.3\columnwidth]{figures/examples/h36m/S9-1.pdf}
-  }
-  \caption{ general title. }
-  \label{fig}
 \end{figure}
 
 \begin{figure*}
@@ -308,7 +291,8 @@ w/o smooth/EM  \cite{zhou2015sparse} & 127.3 & 67.2 & 11.3 & 100.5 & 58.2 & 6.5 
 \begin{table*}
 \caption{HumanEva I上的平均重建误差（mm）\cite{sigal2010humaneva}.}
 \centering
-\renewcommand{\arraystretch}{1.5}
+\renewcommand{\arraystretch}{0.5}
+\renewcommand{\tabcolsep}{0.1 mm}
 \begin{tabular}{l*{3}{c}*{4}{c}}
 \toprule
 & \multicolumn{3}{c}{Walking} & \multicolumn{3}{c}{Jogging} & Average \\
@@ -353,7 +337,8 @@ KTH Multiview Football II \cite{kazemi2013multi}包含职业足球运动员比�
 \begin{table}
 \caption{Mean PCP scores on KTH Football II \cite{burenius20133d}.}
 \centering
-\renewcommand{\arraystretch}{1.5}
+\renewcommand{\arraystretch}{0.5}
+\renewcommand{\tabcolsep}{0.1 mm}
 \begin{tabular}{l*{3}{c}*{1}{c}}
 \toprule
 & \multicolumn{3}{c}{Sequence 1} & \multicolumn{1}{c}{Sequence 2} \\
