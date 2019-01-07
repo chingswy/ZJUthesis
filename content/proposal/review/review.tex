@@ -27,7 +27,7 @@
 从估计的人数上来分，三维人体姿态估计又可以分为单人(single-person)三维人体姿态估计和多人(multi-person)三维人体姿态估计，多人的姿态估计问题相比单人的更加复杂，多人之间的人体互相遮挡与交叉的情况更多，因此也是当前研究的热点所在。
 
 
-最近，深度卷积网络（CNN）已经成为许多现有技术方法背后的共同元素，包括例如3D人体姿态估计\cite{li20143d,li2015maximum,tekin2015predicting,du2016marker,park20163d,zhou2016deep}。为了应对训练数据的稀缺性，最近的一些工作通过图形渲染\cite{chen2016synthesizing}或图像拼接\cite{rogez2016mocap}来合成训练图像。 
+最近，深度卷积网络（CNN）已经成为许多现有技术方法背后的共同元素，包括例如3D人体姿态估计\cite{li20143d,li2015,tekin2015,du2016marker,park20163d,zhou2016deep}。为了应对训练数据的稀缺性，最近的一些工作通过图形渲染\cite{chen2016synthesizing}或图像拼接\cite{rogez2016mocap}来合成训练图像。 
 
 与我们的工作较为密切相关的是：用单个相机捕获的图像序列恢复3D非刚性形状的方法，即运动恢复非刚性结构（NRSFM），\cite{bregler2000recovering,akhter2011trajectory,dai2012simple,zhu2014complex,cho2015complex}, i.e., 运动恢复非刚性结构 (NRSFM)，和基于已知骨架\cite{lee1985determination,taylor2000reconstruction,valmadre2010deterministic,park20113d,radwan2013monocular,leonardos2016articulated}或稀疏表示的人体姿势恢复模型。 \cite{ramakrishna2012reconstructing,fan2014pose,akhter2015pose,zhou20153d,zhou2015sparse}. 这些工作的大部分是通过手动标记2D关节位置来实现的。最近的一些工作已经使用2D姿势检测器来自动提供输入关节\cite{simo2012single,wang2014robust}，或联合解决2D和3D姿态估计\cite{simo2013joint,zhou2014spatio}。
 
@@ -75,12 +75,12 @@
     \caption{由粗到细\autocite{pavlakos2017coarse}：从输入图片中去估计每个关节的深度，深度方向的分辨率由粗到细}\label{fig:c2f}
 \end{figure}
 
-当下有一些文献认为仅仅用 3D 骨架的方法来描述 3D 姿态过于简单, Bogo等人\cite{bogo2016keep}提出了 SMPLify,一种基于优化的,从 14 个检测到的二维关节恢复SMPL 参数的方法。SMPL\autocite{loper2015smpl}是一种参数化表示的人体模型，这个模型从大量三维人体扫描数据中去学习人体的参数化表示，使得人们可以通过低维的参数去表示不通形状的人体模型。Bogo等人\cite{bogo2016keep}使用了优化的方法，将人体模型拟合到从图片中检测出来的二维人体关键点上。但是，由于加入了优化步骤,该方法不是实时的,每个图像需要 20-60 秒的时间进行处理。同时，由于从二维到三维的歧义性，他们在优化过程中加入了许多先验的知识，例如关节的角度的旋转范围，以及一个大量的姿势数据，使得得到的姿势接近数据库中的姿势。其部分结果如\refFig{fig:smpl}所示。 
+当下有一些文献认为仅仅用 3D 骨架的方法来描述 3D 姿态过于简单, Bogo等人\cite{bogo2016keep}提出了 SMPLify,一种基于优化的,从 14 个检测到的二维关节恢复SMPL 参数的方法。SMPL\autocite{loper2015smpl}是一种参数化表示的人体模型，这个模型从大量三维人体扫描数据中去学习人体的参数化表示，使得人们可以通过低维的参数去表示不通形状的人体模型。Bogo等人\cite{bogo2016keep}使用了优化的方法，将人体模型拟合到从图片中检测出来的二维人体关键点上。但是，由于加入了优化步骤,该方法不是实时的,每个图像需要 20-60 秒的时间进行处理。同时，由于从二维到三维的歧义性，他们在优化过程中加入了许多先验的知识，例如关节的角度的旋转范围，以及一个大量的姿势数据，使得得到的姿势接近数据库中的姿势。其部分结果如\refFig{fig:smpl1}所示。 
 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=1\linewidth]{review/smplify.pdf}
-    \caption{Keep it SMPLify\autocite{bogo2016keep}：通过拟合SMPL人体模型到图片的二维关键点上}\label{fig:smpl}
+    \caption{Keep it SMPLify\autocite{bogo2016keep}：通过拟合SMPL人体模型到图片的二维关键点上}\label{fig:smpl1}
 \end{figure}
 
 Lassner \cite{lassner2017unite} 等人 从 SMPLify 的结果训练 91 个关键点探测器,其中一些相当于传统的身体关节,其他对应于身体表面的位置。然后,他们优化SMPL 模型参数以适应与\cite{bogo2016keep}类似的关键点。他们还提出了一种随机森林回归方法来直接回归 SMPL 参数,从而以精确性为代价减少运行时间，如\refFig{fig:up}所示。而近期Kanazawa 等人\cite{kanazawa2018end} 的方法直接从图像推断 SMPL 参数,而不依赖于检测到的 2D关键点,并且做到了实时运行。

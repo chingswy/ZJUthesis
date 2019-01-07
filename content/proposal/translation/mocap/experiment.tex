@@ -61,7 +61,7 @@ Protocol II & - & - & - & 70.5 & 55.1 & 54.6 \\
 e = \frac{1}{n}\sum_{i=1}^n\|\hat\bfx_i-\bfx_i^*\|_2.
 \end{align}
 
-请注意，上述指标取决于估计结构的绝对姿态，包括比例，平移和方向。 尺度和深度模糊是单眼重建所固有的，并且通常无法解决。 该尺度直接从基于预测的方法的训练对象中学习\cite{ionescu2014human,li2015maximum,tekin2015predicting}。 为了公平比较，我们的重建输出被缩放，使得平均肢长与所有训练对象的平均值相同。 作为Human3.6M和HumanEva数据集中的标准协议，比较骨架的根位置是对齐的，以使评估转换不变。 %请注意，不允许Procrustes与基础事实保持一致。
+请注意，上述指标取决于估计结构的绝对姿态，包括比例，平移和方向。 尺度和深度模糊是单眼重建所固有的，并且通常无法解决。 该尺度直接从基于预测的方法的训练对象中学习\cite{ionescu2014human,li2015,tekin2015}。 为了公平比较，我们的重建输出被缩放，使得平均肢长与所有训练对象的平均值相同。 作为Human3.6M和HumanEva数据集中的标准协议，比较骨架的根位置是对齐的，以使评估转换不变。 %请注意，不允许Procrustes与基础事实保持一致。
 
 \textbf{reconstruction error} 为通过相似变换之后的3D关节误差, $\mathcal{T}$:
 \begin{align*}
@@ -88,8 +88,8 @@ r = \min_{\mathcal{T}}\frac{1}{n}\sum_{i=1}^n\|\hat\bfx_i-\mathcal{T}(\bfx_i^*)\
  & Directions & Discussion & Eating & Greeting & Phoning & Photo & Posing & Purchases \\
 \toprule
 LinKDE \cite{ionescu2014human} & 132.7 & 183.5 & 132.3 & 164.3 & 162.1 & 205.9 & 150.6 & 171.3 \\
-Li et al. \cite{li2015maximum} & - & 136.8 & 96.9 & 124.7 & - & 168.6 & - & - \\
-Tekin et al. \cite{tekin2015predicting}$^\dagger$ & 102.4 & 147.7 & 88.8 & 125.2 & 118.0 & 182.7 & 112.3 & 129.1 \\
+Li et al. \cite{li2015} & - & 136.8 & 96.9 & 124.7 & - & 168.6 & - & - \\
+Tekin et al. \cite{tekin2015}$^\dagger$ & 102.4 & 147.7 & 88.8 & 125.2 & 118.0 & 182.7 & 112.3 & 129.1 \\
 Du et al. \cite{du2016marker}$^\dagger$  &        85.0 &       112.6 &        104.9 &        122.0 &        139.0 &        135.9 &        105.9 &        166.1 \\
 Park et al. \cite{park20163d}  &         100.3 &        116.1 &        89.9 &        116.4 &        115.3 &        149.5 & 117.5 &        106.9 \\
 Zhou et al. \cite{zhou2016deep}  &        91.8 &        102.4 &        96.6 &        98.7 &        113.3 &        125.2 &       90.0 &        93.8 \\
@@ -103,8 +103,8 @@ Fine-tuned+specific w/o smooth & 71.4 &         77.0 &         75.7 &         77
  & Sitting & SittingDown & Smoking & Waiting & WalkDog & Walking & WalkTogether & Average \\
 \toprule
 LinKDE \cite{ionescu2014human} & 151.5 & 243.0 & 162.1 & 170.6 & 177.1 & 96.6 & 127.8 & 162.1  \\
-Li et al. \cite{li2015maximum} & - & - & - & - & 132.1 & 69.9 & - & - \\
-Tekin et al. \cite{tekin2015predicting}$^\dagger$ & 138.8 & 224.9 & 118.4 & 138.7 & 126.2 & {55.0 }& {65.7 }& 124.9  \\
+Li et al. \cite{li2015} & - & - & - & - & 132.1 & 69.9 & - & - \\
+Tekin et al. \cite{tekin2015}$^\dagger$ & 138.8 & 224.9 & 118.4 & 138.7 & 126.2 & {55.0 }& {65.7 }& 124.9  \\
 Du et al. \cite{du2016marker}$^\dagger$  &        117.4 &       226.9&        120.0 &        117.6 &        137.3 &        99.2 &        106.5 &        126.4 \\
 Park et al. \cite{park20163d}  &         137.2 &        190.8 &        105.7 &        125.1 &       131.9 &        62.6 &        96.1 &        117.3 \\
 Zhou et al. \cite{zhou2016deep}  &        132.1 &        158.9 &        106.9 &        94.4 &        126.0 &        79.0 &        98.9 &        107.2 \\
@@ -158,14 +158,14 @@ Fine-tuned+nonspecific & 60.1 &         81.5 &         53.2 &         49.7 &    
  & Directions & Discussion &	Eating &	Greeting &	Phoning &	Posing &	Purchases &	Sitting \\
 \toprule
 Ionescu et al. \cite{ionescu2014human} & 117&	108&	91&	129&	104&	130&	134&	135 \\
-Li et al. \cite{li2015maximum} & - & 92& 76& 98& 92& 107& 141& 136 \\
+Li et al. \cite{li2015} & - & 92& 76& 98& 92& 107& 141& 136 \\
 Grinciunaite et al. \cite{grinciunaite2016human} & 91&	89&	94&	102&	105&	99&	112&	151 \\
 Proposed & 78   &    74    &   86 &	80   &    89	& 93	& 76    &   95	\\
 \toprule
  & SittingDown &	Smoking	& Photo &	Waiting &	Walking &	WalkDog &	WalkTogether &    Mean \\
 \toprule
 Ionescu et al. \cite{ionescu2014human} & 200&	117&	195&	132&	115&	162&	156&	133  \\
-Li et al. \cite{li2015maximum} & 265 & 97& 171& 105& 99& 139& 110& 122 \\
+Li et al. \cite{li2015} & 265 & 97& 171& 105& 99& 139& 110& 122 \\
 Grinciunaite et al. \cite{grinciunaite2016human} & 239&	109&	151&	106&	101&	141&	106&	119 \\
 Proposed & 114  &   83	& 101 &	91 &	64	& 87	& 71 &           86\\
 \toprule
@@ -174,7 +174,7 @@ Proposed & 114  &   83	& 101 &	91 &	64	& 87	& 71 &           86\\
 \end{table*}
 
 Human3.6M \cite{ionescu2014human}是最近用于3D人体感知的大型数据集。 它包括从MoCap系统获取的数百万个3D人体姿势以及来自校准相机的相应图像。
-此设置提供同步视频和2D-3D姿势数据以供评估。 它包括11个主题，执行15个动作，如吃饭，坐着和走路。 使用与先前工作相同的数据分区协议\cite{li2015maximum，tekin2015predicting}：来自五个类别（S1，S5，S6，S7，S8）的数据用于训练，并且来自两个类别的数据（S9，S11） ）用于测试。 原始帧速率为50 fps，并下采样为10 fps。
+此设置提供同步视频和2D-3D姿势数据以供评估。 它包括11个主题，执行15个动作，如吃饭，坐着和走路。 使用与先前工作相同的数据分区协议\cite{li2015，tekin2015}：来自五个类别（S1，S5，S6，S7，S8）的数据用于训练，并且来自两个类别的数据（S9，S11） ）用于测试。 原始帧速率为50 fps，并下采样为10 fps。
 
 % \subsubsection{具有已知2D姿势的3D姿势重建}
  
@@ -196,9 +196,9 @@ Human3.6M \cite{ionescu2014human}是最近用于3D人体感知的大型数据集
 
 % \subsubsection{3D pose reconstruction with unknown 2D pose}
 
-% Next, results on the Human3.6M dataset are reported when 2D poses are predicted from images using the CNN described in \refSec{sec:cnn}. The proposed approach is compared to several recent baselines including both discriminative approaches (e.g., \cite{ionescu2014human,li2015maximum,tekin2015predicting}) and two-stage reconstruction approaches (e.g., \cite{bogo2016keep}). For the proposed approach, four combinations of training data sources were considered -- the generic hourglass model trained on MPII (``generic'') or the fine-tuned model trained on Human3.6M (``fine-tuned'') combined with the nonspecific dictionary learned with all 3D pose data (``nonspecific'') or the dictionary learned with action specific pose data (``specific'').
+% Next, results on the Human3.6M dataset are reported when 2D poses are predicted from images using the CNN described in \refSec{sec:cnn}. The proposed approach is compared to several recent baselines including both discriminative approaches (e.g., \cite{ionescu2014human,li2015,tekin2015}) and two-stage reconstruction approaches (e.g., \cite{bogo2016keep}). For the proposed approach, four combinations of training data sources were considered -- the generic hourglass model trained on MPII (``generic'') or the fine-tuned model trained on Human3.6M (``fine-tuned'') combined with the nonspecific dictionary learned with all 3D pose data (``nonspecific'') or the dictionary learned with action specific pose data (``specific'').
 
-% The mean per joint errors are summarized in \refTab{tab:h36m}. The table shows that the proposed approach outperforms the baselines on most of the actions, yielding a much lower average error compared to the baselines. The ``walk" and ``walk together" sequences involve very predictable and repetitive motions. This might favor the direct regression approach \cite{tekin2015predicting}. The reconstruction errors are provided in \refTab{tab:h36m1}. The proposed approach with a generic 2D pose detector outperforms SMPLify \cite{bogo2016keep}, which is the state-of-the-art two-stage approach that reconstructs 3D poses by fitting a parametric body shape model to 2D joints detected by a CNN-based 2D pose detector.
+% The mean per joint errors are summarized in \refTab{tab:h36m}. The table shows that the proposed approach outperforms the baselines on most of the actions, yielding a much lower average error compared to the baselines. The ``walk" and ``walk together" sequences involve very predictable and repetitive motions. This might favor the direct regression approach \cite{tekin2015}. The reconstruction errors are provided in \refTab{tab:h36m1}. The proposed approach with a generic 2D pose detector outperforms SMPLify \cite{bogo2016keep}, which is the state-of-the-art two-stage approach that reconstructs 3D poses by fitting a parametric body shape model to 2D joints detected by a CNN-based 2D pose detector.
 
 % Comparing the results using different sources of training data, a remarkable improvement was achieved by using the fine-tuned 2D pose detector and the action specific 3D pose dictionaries. Nevertheless, the proposed approach with the generic detector and non-action specific dictionary still attained very competitive performance compared to the state-of-the-art. Note that the proposed approach can also be applied to single frames without temporal smoothness, with corresponding results presented in the last row of \refTab{tab:h36m}. 
 
@@ -329,7 +329,7 @@ Proposed & {34.3} & 31.6 & 49.3 & 48.6 & {34.0} & {30.0} & {37.9}\\
 KTH Multiview Football II \cite{kazemi2013multi}包含职业足球运动员比赛的图像。
 它包括具有3D基础事实的图像序列，用于从三个校准视图捕获的14个注释关节。
 使用手动2D注释的多视图重建生成3D地面实况。
-我们的评估是使用标准协议\cite{tekin2015predicting}进行的，其中来自“相机1”的“播放器2”的序列用于测试。在MPII上训练的通用沙漏模型被用作2D检测器而没有罚款 -tuning，同时使用与该数据集中提供的训练图像相关联的3D姿势来学习姿势字典。
+我们的评估是使用标准协议\cite{tekin2015}进行的，其中来自“相机1”的“播放器2”的序列用于测试。在MPII上训练的通用沙漏模型被用作2D检测器而没有罚款 -tuning，同时使用与该数据集中提供的训练图像相关联的3D姿势来学习姿势字典。
 通过所提出的方法重建的每个3D姿势被缩放以具有与训练姿势相同的平均肢长，然后通过根据根位置的平移与地面实况对齐。
 为了与基线进行比较，报告的结果基于用于测量3D中的部件定位的正确姿势（PCP）的百分比。
 \refTab{tab:kth}提供了PCP结果的摘要。 它表明，所提出的方法实现了比现有技术更高的准确性。 选定帧的结果在\refFig{fig:kth}中可视化。
@@ -342,7 +342,7 @@ KTH Multiview Football II \cite{kazemi2013multi}包含职业足球运动员比�
 \begin{tabular}{l*{3}{c}*{1}{c}}
 \toprule
 & \multicolumn{3}{c}{Sequence 1} & \multicolumn{1}{c}{Sequence 2} \\
-& \cite{burenius20133d} & \cite{tekin2015predicting} & Proposed & Proposed \\
+& \cite{burenius20133d} & \cite{tekin2015} & Proposed & Proposed \\
 \toprule
 Upper Arms & 14 & 74 & {89} & 61\\
 Lower Arms & 06 & 49 & {78} & 49\\

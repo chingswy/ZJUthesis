@@ -96,3 +96,11 @@ See the biblatex package documentation for explanation.
 Type  H <return>  for immediate help.
 ```
 
+```bash
+! LaTeX Error: Cannot determine size of graphic in figure/1701.02354.pdf (no Bo
+undingBox).
+```
+https://tex.stackexchange.com/questions/124340/latex-error-cannot-determine-size-of-graphic-in-simlinkerror-pdf-no-bounding/207160#207160
+
+不是这个问题，一般是PDF文档的问题，把该文件print to file一下，重新得到一个PDF就好了。
+
