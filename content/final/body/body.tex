@@ -11,33 +11,7 @@
 \subsection{应用}
 \comment{这里主要写将模型拿来应用到我们的数据上，以及结果}
 
-\section{人体三维姿态估计问题的研究}
-\subsection{问题描述}
-三维人体姿态估计问题，即是说给定输入的人体图片或视频序列，从中得到人体的三维关节点的位置。从上一节中我们已经得到了人体的二维关节点位置，因此对于这一部分我们需要得到相应的人体三维姿态的估计。但是在只有单个视角的情况下，三维估计具有尺度和深度的不确定性。在只有一个相机的情况下，通常使用各种先验信息来减少这种不确定性，在我们的实验场景下，我们可以利用多个相机的空间信息，来优化求解人体的三维关节点的坐标。
-
-\subsection{模型概述}
-\subsubsection{相机标定}
-\comment{这里写相机标定的内容}
-\subsubsection{三角法}
-
-\subsubsection{优化法}
-假定未知的三维点的坐标为$S\in \mathbb{R}^{3\times p}$ ，第$i$ 个相机的参数为$R_i,T_i,K_i$。相机投影模型为
-\begin{equation}
-    Z_i W_i = K_i(R_iS + T_i)
-\end{equation}
-\begin{equation}
-W_i = Z_i^{-1}K_i(R_iS + T_i)    
-\end{equation}
-其中$W_i\in \mathbb{R}^{3\times p}$  表示第$i$ 个相机下的二维齐次坐标，那么根据各个视角下的观测到的二维坐标，我们的目标函数可以写为
-\begin{equation}
-    \min \sum^I_{i=1} \sum_{p=1}^P \omega_{ip}||W_{ip} - \hat W_{ip}||_2
-\end{equation}
-\begin{equation}
-    \min \sum^I_{i=1} \sum_{p=1}^P \omega_{ip}||Z_i^{-1}K_i(R_iS_p + T_i) - \hat W_{ip}||_2  
-\end{equation}
-
-\subsection{模型应用}
-\comment{写在LightStage数据上采集得到的结果}
+\input{content/final/body/3d.tex}
 
 \section{人体几何模型的应用}
 \subsection{问题描述}
