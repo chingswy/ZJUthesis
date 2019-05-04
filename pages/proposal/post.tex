@@ -1,9 +1,15 @@
-\cleardoublestylepage{empty}
+% \cleardoublestylepage{empty}
 \thispagestyle{empty}
 
 \ifthenelse{\equal{\Type}{design}}
 {
-    \inputpage{proposal/design/post}
+    % \inputpage{proposal/design/post}
+    \begin{center}
+        \includepdf[
+            pages=1,
+            scale=0.8,
+            pagecommand={\pagestyle{empty}}]{kaohe.pdf}
+    \end{center}
 }
 {
     \inputpage{proposal/thesis/post}

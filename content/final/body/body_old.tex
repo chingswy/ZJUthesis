@@ -1,0 +1,149 @@
+\cleardoublestylepage{common}
+\newcommand{\sigp}{$\sigma$点}
+\newcommand{\sigm}{\sigma^{(m)}}
+\section{模型建立}
+\subsection{无迹卡尔曼滤波模型}
+\subsubsection{卡尔曼滤波}
+对于一个零输入的线性系统，其系统的动力学方程可以写为
+\begin{align}
+    x_k &= A_kx_{k-1} + \omega_k \\
+    y_k &= C_kx_k + v_k
+\end{align}
+这里的$\omega_k$表示状态噪声，$v_k$表示观测噪声，假设这里的噪声都是服从零均值的高斯分布，即
+\begin{equation}
+    \omega_k \sim N(0,R),v_k\sim N(0,Q)
+\end{equation}
+那么经典的卡尔曼滤波可以分为先验估计和后验更新两个步骤：
+
+1. 先验估计：
+\begin{equation}
+    \bar{x}_k = A_k\hat{x}_{k-1} + u_k,\bar{P}_k = A_k\hat{P}_{k-1}A_k^T + R.
+\end{equation}
+
+2. 更新：先计算卡尔曼增益$K$
+\begin{align}
+    P_{xy} &= \bar{P}_kC_k^T \\
+    P_{yy} &= C_k\bar{P}_kC_k^T + Q_k \\
+    K &= P_{xy}P_{yy}^{-1} = \bar{P}_kC_k^T(C_k\bar{P}_kC_k^T + Q_k)^{-1}
+\end{align}
+然后计算后验概率分布
+\begin{align}
+    \hat{x}_k & = \bar{x}_k + K(y_k-C_k\bar{x}_k) \\
+    \hat{P}_k &= (I-KC_k)\bar{P}_k.
+\end{align}
+
+\subsection{无迹卡尔曼滤波}
+在卡尔曼滤波中，假设系统是线性的。但是在实际问题中，运动方程和观测方程中出现了非线性变换，因此系统成为了非线性系统。高斯分布通过非线性系统将不一定仍保持高斯分布。因此在描述人体状态时常常不满足卡尔曼滤波的假设，为了仍然使用卡尔曼滤波，我们将采用改进之后的卡尔曼滤波器。
+
+无迹卡尔曼滤波是通过选择$\sigma$点来描述状态变量的均值和方差。即设状态变量为$x$，$\bar{x},P$分别表示状态变量的均值和方差，那么计算\sigp,
+\begin{align}
+    \sigma^{(0)} &= \bar{x} \\
+    \sigma^{(m)} &= \bar{x} \pm \left(\sqrt{(M+\lambda)P}\right)_m,m=1,\ldots,2M,
+\end{align}
+其中$(\sqrt{\cdot})_m$表示Cholesky分解的第$m$列，$\lambda$是控制\sigp 和均值点的距离的参数。那么$f(x)$的均值和方差就可以计算得到：
+\begin{align}
+    E\left[f(x)\right] &\approx \mu = \sum_{m=0}^{2M}w_m f(\sigm),\\
+    cov\left[f(x)\right] &\approx \sum_{m=0}^{2M}w_m (f(\sigm) - \mu)(f(\sigm) - \mu)^T
+\end{align}
+其中权重的定义为
+\begin{align}
+    w_0 &= \frac{\lambda}{\lambda+M},\\
+    w_m &= \frac{1}{2(\lambda + M)},m = 1,\ldots,2M.
+\end{align}
+此时计算卡尔曼增益与经典的卡尔曼滤波有所区别，即
+\begin{align}
+    P_{yy} \approx \sum_{m=0}^{2M}w_m(h(\sigm) - \hat{y}_t)(h(\sigm) - \hat{y}_t)^T \\
+    P_{xy} \approx \sum_{m=0}^{2M}w_m(f(\sigm) - \hat{y}_t)(h(\sigm) - \hat{y}_t)^T 
+\end{align}
+
+\subsection{人体骨架模型}
+对于一个人体骨架，我们使用$p$个关节点来表示，那么$t$时刻人体的三维姿态就可以通过这$p$个关节点的三维位置来表示，记为$S_t \in \mathbb{R}^{3\times p}$\comment{按MonoCap里面的记号写的}。我们假设人体的骨架长度是已知的，那么我们可以使用每一段骨架的朝向来描述人体的姿态。即，对于同一段骨架的两端的关节点的坐标$x_i(t),x_j(t)$，其骨架长度约束可以描述为
+\begin{equation}
+    ||x_i(t) - x_j(t)||_2 = l_{ij} = const.
+\end{equation}
+那么其朝向可以记为
+\begin{equation}
+    x_{ij} \doteq \frac{x_j-x_i}{||x_i(t) - x_j(t)||_2} \in \mathbb{S}^2
+\end{equation}
+因此，一个子节点的位置可以通过其父节点的位置，以及这一段骨架的朝向来唯一确定。同时，我们考虑其运动速度，那么则有
+\begin{equation}
+    \dot{x}_j(t) = \dot{x}_i(t) + l_{ij}\omega_{ij}(t) 
+\end{equation}
+其中$\omega_{ij} \doteq \dot{x}_{12}(t)$。因此，子节点的速度可以通过角速度以及父节点的速度唯一确定。其中$\omega_{ij}(t)\in T_{x_{ij}(t)}\mathbb{S}^2$。
+
+\comment{差一个建立坐标的图}
+
+\subsubsection{运动模型}
+\comment{这里写在manifold上如何进行运动的}
+\subsubsection{观测模型}
+\comment{写相机观测这些}
+
+\subsection{人体骨架上的卡尔曼滤波}
+
+
+% \section{正文}
+
+% \subsection{节标题}
+
+% \subsubsection{小节标题}
+
+% \par 如\autoref{fig:a-figure}所示，这是一张由TIKZ\autocite{tikz}包画出的图片，我们也可以用includegraphics来插入现有的jpg等格式的图片，如\autoref{fig:zju-logo}。
+
+% \begin{figure}[ht]
+%     \centering
+%     \begin{tikzpicture}[thick,help lines/.style={thin,draw=black!50}]
+%         \def\A{\textcolor{input}{$A$}} \def\B{\textcolor{input}{$B$}}
+%         \def\C{\textcolor{output}{$C$}} \def\D{$D$}
+%         \def\E{$E$}
+
+%         \colorlet{input}{blue!80!black} \colorlet{output}{red!70!black}
+%         \colorlet{triangle}{orange}
+
+%         \coordinate [label=left:\A] (A) at ($ (0,0) + .1*(rand,rand) $);
+%         \coordinate [label=right:\B] (B) at ($ (1.25,0.25) + .1*(rand,rand) $);
+
+%         \draw [input] (A) -- (B);
+
+%         \node [name path=D,help lines,draw,label=left:\D] (D) at (A) [circle through=(B)] {};
+%         \node [name path=E,help lines,draw,label=right:\E] (E) at (B) [circle through=(A)] {};
+
+%         \path [name intersections={of=D and E,by={[label=above:\C]C}}];
+
+%         \draw [output] (A) -- (C) -- (B);
+
+%         \foreach \point in {A,B,C}
+%             \fill [black,opacity=.5] (\point) circle (2pt);
+
+%         \begin{pgfonlayer}{background}
+%             \fill[triangle!80] (A) -- (C) -- (B) -- cycle;
+%         \end{pgfonlayer}
+%     \end{tikzpicture}
+
+%     \caption{\label{fig:a-figure}这是一张图片}
+% \end{figure}
+
+% \begin{figure}[ht]
+%     \centering
+%     \includegraphics[width=.4\linewidth]{logo/zju}
+%     \caption{\label{fig:zju-logo}浙江大学LOGO}
+% \end{figure}
+
+% \par 如\autoref{tab:sample}所示，这是一张自动调节列宽的表格。
+
+% \begin{table}[ht]
+%     \caption{\label{tab:sample}自动调节列宽的表格}
+%     \begin{tabularx}{\linewidth}{c|X<{\centering}}
+%         \hline
+%         第一列 & 第二列 \\ \hline
+%         xxx & xxx \\ \hline
+%         xxx & xxx \\ \hline
+%         xxx & xxx \\ \hline
+%     \end{tabularx}
+% \end{table}
+
+% \par 如\autoref{equ:sample}，这是一个公式
+
+% \begin{equation}
+%     \label{equ:sample}
+%     A=\overbrace{(a+b+c)+\underbrace{i(d+e+f)}_{\text{虚数}}}^{\text{复数}}
+% \end{equation}

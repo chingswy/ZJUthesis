@@ -104,3 +104,6 @@ https://tex.stackexchange.com/questions/124340/latex-error-cannot-determine-size
 
 不是这个问题，一般是PDF文档的问题，把该文件print to file一下，重新得到一个PDF就好了。
 
+## 修改页眉页脚
+
+改成机械工程学院的

@@ -1,9 +1,16 @@
-\cleardoublestylepage{empty}
+% \cleardoublestylepage{empty}
+\clearpage
 \thispagestyle{empty}
-
 \ifthenelse{\equal{\Type}{design}}
 {
-    \inputpage{proposal/design/previous}
+    % \inputpage{proposal/design/previous}
+    \begin{center}
+        \includepdf[
+            pages=1,
+            scale=1,
+            pagecommand={\pagestyle{empty}},
+            frame]{yaoqiu.pdf}
+    \end{center}
 }
 {
     \inputpage{proposal/thesis/previous}

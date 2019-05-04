@@ -1,68 +1,61 @@
-\cleardoublestylepage{common}
+\section{人体二维姿态估计问题的研究}
+\subsection{问题描述}
+人体二维人体姿态估计问题，即是说给定输入的图片或视频序列，进行处理得到相应的人体各个关节在图片上的位置。
+\subsection{研究方法比较}
+\begin{itemize}
+    \item CPN 
+    \item OpenPose
+    \item AlphaPose
+\end{itemize}
 
-\section{正文}
+\subsection{应用}
+\comment{这里主要写将模型拿来应用到我们的数据上，以及结果}
 
-\subsection{节标题}
+\section{人体三维姿态估计问题的研究}
+\subsection{问题描述}
+三维人体姿态估计问题，即是说给定输入的人体图片或视频序列，从中得到人体的三维关节点的位置。从上一节中我们已经得到了人体的二维关节点位置，因此对于这一部分我们需要得到相应的人体三维姿态的估计。但是在只有单个视角的情况下，三维估计具有尺度和深度的不确定性。在只有一个相机的情况下，通常使用各种先验信息来减少这种不确定性，在我们的实验场景下，我们可以利用多个相机的空间信息，来优化求解人体的三维关节点的坐标。
 
-\subsubsection{小节标题}
+\subsection{模型概述}
+\subsubsection{相机标定}
+\comment{这里写相机标定的内容}
+\subsubsection{三角法}
 
-\par 如\autoref{fig:a-figure}所示，这是一张由TIKZ\autocite{tikz}包画出的图片，我们也可以用includegraphics来插入现有的jpg等格式的图片，如\autoref{fig:zju-logo}。
-
-\begin{figure}[ht]
-    \centering
-    \begin{tikzpicture}[thick,help lines/.style={thin,draw=black!50}]
-        \def\A{\textcolor{input}{$A$}} \def\B{\textcolor{input}{$B$}}
-        \def\C{\textcolor{output}{$C$}} \def\D{$D$}
-        \def\E{$E$}
-
-        \colorlet{input}{blue!80!black} \colorlet{output}{red!70!black}
-        \colorlet{triangle}{orange}
-
-        \coordinate [label=left:\A] (A) at ($ (0,0) + .1*(rand,rand) $);
-        \coordinate [label=right:\B] (B) at ($ (1.25,0.25) + .1*(rand,rand) $);
-
-        \draw [input] (A) -- (B);
-
-        \node [name path=D,help lines,draw,label=left:\D] (D) at (A) [circle through=(B)] {};
-        \node [name path=E,help lines,draw,label=right:\E] (E) at (B) [circle through=(A)] {};
-
-        \path [name intersections={of=D and E,by={[label=above:\C]C}}];
-
-        \draw [output] (A) -- (C) -- (B);
-
-        \foreach \point in {A,B,C}
-            \fill [black,opacity=.5] (\point) circle (2pt);
-
-        \begin{pgfonlayer}{background}
-            \fill[triangle!80] (A) -- (C) -- (B) -- cycle;
-        \end{pgfonlayer}
-    \end{tikzpicture}
-
-    \caption{\label{fig:a-figure}这是一张图片}
-\end{figure}
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=.4\linewidth]{logo/zju}
-    \caption{\label{fig:zju-logo}浙江大学LOGO}
-\end{figure}
-
-\par 如\autoref{tab:sample}所示，这是一张自动调节列宽的表格。
-
-\begin{table}[ht]
-    \caption{\label{tab:sample}自动调节列宽的表格}
-    \begin{tabularx}{\linewidth}{c|X<{\centering}}
-        \hline
-        第一列 & 第二列 \\ \hline
-        xxx & xxx \\ \hline
-        xxx & xxx \\ \hline
-        xxx & xxx \\ \hline
-    \end{tabularx}
-\end{table}
-
-\par 如\autoref{equ:sample}，这是一个公式
-
+\subsubsection{优化法}
+假定未知的三维点的坐标为$S\in \mathbb{R}^{3\times p}$ ，第$i$ 个相机的参数为$R_i,T_i,K_i$。相机投影模型为
 \begin{equation}
-    \label{equ:sample}
-    A=\overbrace{(a+b+c)+\underbrace{i(d+e+f)}_{\text{虚数}}}^{\text{复数}}
+    Z_i W_i = K_i(R_iS + T_i)
 \end{equation}
+\begin{equation}
+W_i = Z_i^{-1}K_i(R_iS + T_i)    
+\end{equation}
+其中$W_i\in \mathbb{R}^{3\times p}$  表示第$i$ 个相机下的二维齐次坐标，那么根据各个视角下的观测到的二维坐标，我们的目标函数可以写为
+\begin{equation}
+    \min \sum^I_{i=1} \sum_{p=1}^P \omega_{ip}||W_{ip} - \hat W_{ip}||_2
+\end{equation}
+\begin{equation}
+    \min \sum^I_{i=1} \sum_{p=1}^P \omega_{ip}||Z_i^{-1}K_i(R_iS_p + T_i) - \hat W_{ip}||_2  
+\end{equation}
+
+\subsection{模型应用}
+\comment{写在LightStage数据上采集得到的结果}
+
+\section{人体几何模型的应用}
+\subsection{问题描述}
+在上一部分中，我们已经从图片中得到人体的三维关节点的坐标，但是在实际应用中，简单的骨架表示不够具有表现力，因此最新的论文里的做法是使用一个预先生成好的参数化的人体几何模型，通过优化算法，或者直接通过网络估计，得到该模型的参数。在我们的问题中，希望通过输入一个人体的骨架的三维坐标，输出该参数化模型的参数。由于骨架坐标无法完全确定该模型的参数，因此我们需要引入一些额外的约束，来完成该求解过程。
+
+\subsection{模型介绍}
+\comment{这里写SMPL的模型介绍，找一篇论文对照着写一下}
+
+\subsection{算法分析}
+\comment{这里写如何Fit，就是简单的loss函数}
+
+\section{视频中的人体重建}
+
+\section{结论与展望}
+\subsection{结论}
+在本研究中，我们完成了从光场系统获得多个视角下的视频序列采集，首先通过深度卷积神经网络得到人体二维关节点坐标；再通过Ceres求解无约束条件下的最小二乘问题，得到了人体三维关节点坐标；在此基础上，我们引入了参数化的人体模型SMPL，通过求解优化问题恢复出该模型的参数，再结合几何信息得到了更细致的模型表达，完成了对人体模型的三维重建过程。
+
+\subsection{论文中出现的问题及思考}
+
+\subsection{展望}
+

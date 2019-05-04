@@ -23,11 +23,15 @@
     \ifthenelse{\equal{\Type}{design}}
     {
         % `design` content
+        \pagestyle{wxzshead}
         \input{content/proposal/review/review}
+        \pagestyle{ktbghead}
         \input{content/proposal/proposal/proposal}
+        \pagestyle{wxfyhead}
         \input{content/proposal/translation/translation}
+        \pagestyle{wxywhead}
         \input{content/proposal/original/original}
-        \input{content/proposal/midcheck/midcheck}
+        % \input{content/proposal/midcheck/midcheck}
     }
     {
         % otherwise, blank

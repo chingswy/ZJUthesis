@@ -20,7 +20,18 @@
 {
     \fancyhead{}
     \fancyhead[EL]{\zihao{-5} 浙江大学本科生毕业论文（设计）}
-    \fancyhead[OR]{\zihao{-5} \Title}
+    \fancyhead[OL]{\zihao{-5} 浙江大学本科生毕业论文（设计）}
+    \fancyhead[OR]{\zihao{-5}}
+    \renewcommand{\headrulewidth}{0.6pt}
+}
+
+\newcommand{\newhead}[1]
+{
+    \fancyhead{}
+    \fancyhead[EL]{\zihao{-5} 浙江大学本科生毕业论文（设计）}
+    \fancyhead[OL]{\zihao{-5} 浙江大学本科生毕业论文（设计）}
+    \fancyhead[OR]{\zihao{-5} #1}
+    \fancyhead[ER]{\zihao{-5} #1}
     \renewcommand{\headrulewidth}{0.6pt}
 }
 
@@ -37,7 +48,7 @@
 {
     \commonhead{}
     \fancyfoot{}
-    \fancyfoot[OC,EC]{\zihao{-5}\Roman{page}}
+    \fancyfoot[OC,EC]{\zihao{-5}\thepage}
 }
 
 % Explicitly remove plain page style
@@ -48,6 +59,46 @@
     \renewcommand{\headrulewidth}{0pt}
 }
 
+\fancypagestyle{empty}
+{
+    \fancyhead{}
+    \fancyfoot{}
+    \renewcommand{\headrulewidth}{0pt}
+}
+
+\fancypagestyle{contenthead}
+{
+    \newhead{目录}
+    \fancyfoot{}
+    \fancyfoot[OC,EC]{\zihao{-5}\thepage}
+}
+\fancypagestyle{wxzshead}
+{
+    \newhead{文献综述}
+    \fancyfoot{}
+    \fancyfoot[OC,EC]{\zihao{-5}\thepage}
+}
+
+\fancypagestyle{ktbghead}
+{
+    \newhead{开题报告}
+    \fancyfoot{}
+    \fancyfoot[OC,EC]{\zihao{-5}\thepage}
+}
+
+\fancypagestyle{wxfyhead}
+{
+    \newhead{文献翻译}
+    \fancyfoot{}
+    \fancyfoot[OC,EC]{\zihao{-5}\thepage}
+}
+
+\fancypagestyle{wxywhead}
+{
+    \newhead{文献原文}
+    \fancyfoot{}
+    \fancyfoot[OC,EC]{\zihao{-5}\thepage}
+}
 % Set default page styles
 \pagestyle{common}
 \assignpagestyle{\chapter}{common}

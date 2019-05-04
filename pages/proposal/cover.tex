@@ -17,19 +17,19 @@
         文献综述和开题报告
     }
     {
-        本~~科~~生~~毕~~业~~设~~计
+        本~~科~~生~~毕~~业~~设~~计~~(论文)
         \\ \vskip 24pt
-        开题报告
+        文献综述和开题报告
     }
 \end{center}
 
-\vskip 40pt
+\vskip 20pt
 
 \begin{center}
     \includegraphics[width=0.17\paperwidth]{logo/zju.pdf}
 \end{center}
 
-\vskip 40pt
+\vskip 20pt
 \ifthenelse{\equal{\BlindReview}{true}}
 {
     % in blind review
@@ -44,14 +44,27 @@
     \end{center}
 }
 {
+    \begin{center}
+        \zihao{3}
+        \begin{tabularx}{1.1\textwidth}{>{\fangsong}l >{\fangsong}X<{\centering}}
+            中文题目 & 单目视频中的人体三维姿态估计 \\
+            英文题目   & Human 3D Pose Reconstruction From Monocular Video
+        \end{tabularx}
+    \end{center}
     % not in blind review
     \begin{center}
-        \bfseries \zihao{3}
+        % \bfseries 
+        \zihao{3}
         \begin{tabularx}{.7\textwidth}{>{\fangsong}l >{\fangsong}X<{\centering}}
-            姓名与学号 & \uline{\hfill \StudentName~\StudentID \hfill} \\
+            姓名 学号 & \uline{\hfill \StudentName~\StudentID \hfill} \\
             指导教师   & \uline{\hfill \AdvisorName \hfill}            \\
             年级与专业 & \uline{\hfill \mbox{\Grade}级\Major \hfill}   \\
             所在学院   & \uline{\hfill \Department \hfill}             \\
         \end{tabularx}
+    \end{center}
+    \vskip 20pt
+
+    \begin{center}
+        \zihao{3}2019 年 1月30日
     \end{center}
 }
