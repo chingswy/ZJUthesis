@@ -7,21 +7,7 @@
 \subsubsection{相机模型}
 \comment{先写一下相机模型的定义}
 
-\subsubsection{相机标定}
-由于LightStage系统的相机较多，与单个相机的标定方法有所区别，因此我们的标定主要分为以下步骤：
-\begin{enumerate}
-    \item 打印一个棋盘格，已知其实际尺寸
-    \item 对每个相机，拍摄不同角度的棋盘格的图片
-    \item 对于所有相机，使棋盘格位于所有相机都可见的位置，拍摄系列图片
-    \item 检测图片中的棋盘格角点
-    \item 对于每个相机，估计其内部参数
-    \item 使用所有相机，同时估计所有相机的外部参数
-    \item 对参数进行最后的优化
-\end{enumerate}
-
 \comment{这里写相机标定的内容}
-
-
 \subsubsection{三角法}
 % https://scm_mos.gitlab.io/2018/12/08/triangulate/
 对于三维空间中的一点$\bfX$，其在世界坐标系中的表示为
@@ -108,6 +94,33 @@
 \subsection{模型应用}
 \comment{写在LightStage数据上采集得到的结果}
 
-\subsection{量化分析}
-为了量化评估该方法对
-\comment{写在其他数据集上的测试结果，应该用h36m的，这个有marker；或者用cmu panoptic数据集}
+\begin{tikzpicture}[scale=0.9, transform shape]
+    %\draw[step=0.5cm,gray,very thin] (0,0) grid (4,3);
+    \draw[->] (0,0) -- (4,0) ; 
+    \draw[->] (0,0) -- (0,3) ; 
+    \draw[-] (1,2) -- (3,1.5); 
+    \draw[dotted] (1,1) -- (3,0.5); 
+    \draw[-] (1,1) -- (3,1.25);
+    \draw[->] (2.5,2.5) -- (2.15,1.8);
+    \draw[->] (1.6,1.5) -- (2,1.25); 
+    \draw[->] (1.5,0.5) -- (2,0.65); 
+    \draw[-] (1,0.05) -- (1,-0.05);
+    \draw[-] (3,0.05) -- (3,-0.05);
+    \draw[decoration={brace},decorate]
+    (3.1,1.25) -- node[right] {{\tiny Treatment Effect}} (3.1,0.5);
+    \node at (4,-0.25) {\scriptsize\textbf{Time}};
+    \node at (-0.35,3.25) {\scriptsize\textbf{Employment}};
+    \node at (-0.35,3) {\scriptsize\textbf{Rate}};
+    \node at (1,-0.25) {\scriptsize\textbf{Before}};
+    \node at (3,-0.25) {\scriptsize\textbf{After}};
+    \node at (3,2.75) {\tiny\textbf{employment trend}};
+    \node at (3,2.6) {\tiny\textbf{in control state}};
+    \node at (0.85,1.6) {\tiny\textbf{employment trend}};
+    \node at (0.85,1.45) {\tiny\textbf{in treatment state}};
+    \node at (0.85,0.5) {\tiny\textbf{counterfactual}};
+    \fill (1,1) circle[radius=1pt];
+    \fill (3,0.5) circle[radius=1pt]; 
+    \fill (3,1.5) circle[radius=1pt]; 
+    \fill (3,1.25) circle[radius=1pt]; 
+    \fill (1,2) circle[radius=1pt]; 
+    \end{tikzpicture}

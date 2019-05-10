@@ -1,27 +1,10 @@
-\section{人体二维姿态估计问题的研究}
-\subsection{问题描述}
-人体二维人体姿态估计问题，即是说给定输入的图片或视频序列，进行处理得到相应的人体各个关节在图片上的位置。
-\subsection{研究方法比较}
-\begin{itemize}
-    \item CPN 
-    \item OpenPose
-    \item AlphaPose
-\end{itemize}
-
-\subsection{应用}
-\comment{这里主要写将模型拿来应用到我们的数据上，以及结果}
+\input{content/final/body/2d.tex}
 
 \input{content/final/body/3d.tex}
 
-\section{人体几何模型的应用}
-\subsection{问题描述}
-在上一部分中，我们已经从图片中得到人体的三维关节点的坐标，但是在实际应用中，简单的骨架表示不够具有表现力，因此最新的论文里的做法是使用一个预先生成好的参数化的人体几何模型，通过优化算法，或者直接通过网络估计，得到该模型的参数。在我们的问题中，希望通过输入一个人体的骨架的三维坐标，输出该参数化模型的参数。由于骨架坐标无法完全确定该模型的参数，因此我们需要引入一些额外的约束，来完成该求解过程。
+\input{content/final/body/smpl.tex}
 
-\subsection{模型介绍}
-\comment{这里写SMPL的模型介绍，找一篇论文对照着写一下}
 
-\subsection{算法分析}
-\comment{这里写如何Fit，就是简单的loss函数}
 
 \section{视频中的人体重建}
 
