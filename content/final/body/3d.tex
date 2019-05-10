@@ -1,4 +1,5 @@
 
+
 \section{人体三维姿态估计问题的研究}
 \subsection{问题描述}
 三维人体姿态估计问题，即是说给定输入的人体图片或视频序列，从中得到人体的三维关节点的位置。从上一节中我们已经得到了人体的二维关节点位置，因此对于这一部分我们需要得到相应的人体三维姿态的估计。但是在只有单个视角的情况下，三维估计具有尺度和深度的不确定性。在只有一个相机的情况下，通常使用各种先验信息来减少这种不确定性，在我们的实验场景下，我们可以利用多个相机的空间信息，来优化求解人体的三维关节点的坐标。
@@ -8,6 +9,8 @@
 \comment{先写一下相机模型的定义}
 
 \subsubsection{相机标定}
+目前主流的相机标定方法是微软研究院的高级研究员张正友教授与1998年提出的一种利用单个棋盘格平面进行相机标定的方法，该方法介于传统标定法和自标定法之间，标定效果较好，并且计算复杂度低。同时不需要高精度的标定物，便于操作。因此我们使用该方法进行相机的标定。
+
 由于LightStage系统的相机较多，与单个相机的标定方法有所区别，因此我们的标定主要分为以下步骤：
 \begin{enumerate}
     \item 打印一个棋盘格，已知其实际尺寸
@@ -20,7 +23,84 @@
 \end{enumerate}
 
 \comment{这里写相机标定的内容}
+\newcommand{\qczb}{齐次坐标}
+假设三维世界坐标系中的点的\qczb 为\(X = [x,y,z,1]^T\)，其在二维相机平面上的\qczb 为\(m = [u,v,1]^T\)。那么由相机模型的定义我们可以知道：
 
+\begin{equation}
+    Z \bm{m} = K(R\bm{X} + T)
+\end{equation}
+在进行标定时，假设棋盘格所在平面为世界坐标系中的\(Z=0\)的平面，那么则有
+\begin{equation}
+Z\left[ \begin{array}{c} u \\ v \\ 1 \end{array} \right] = K\left[ 
+    \begin{array}{cccc} r_1 & r_2 & r_3 & t\end{array}
+    \right]
+    \left[ 
+    \begin{array}{c}x \\y \\0 \\1\end{array}
+    \right]=K
+    \left[ 
+    \begin{array}{cccc} r_1 & r_2 & T\end{array}
+    \right]
+    \left[ 
+    \begin{array}{c}x \\y \\1\end{array}
+    \right]
+\end{equation}
+其中\(r_1,r_2,r_3\)分别代表旋转矩阵\(R\)的列向量，令
+\begin{equation}
+    H=[h_1\ h_2\ h3] = \lambda K[r_1\ r_2\ t]
+\end{equation}
+该矩阵即为棋盘格平面到像素平面的变换矩阵，记为单应性矩阵。\(H\)是一个齐次矩阵，因此有8个未知数，至少需要8个方程来进行求解。由上式可得：
+\begin{align}
+    \lambda &= \frac{1}{Z} \\
+    r_1 &= \frac{1}{\lambda} K^{-1}h_1 \\
+    r_2 &= \frac{1}{\lambda} K^{-1}h_2
+\end{align}
+
+由于\(R\)是旋转矩阵，\(r_1, r_2\)分别是旋转矩阵的两列，因此这两个向量正交，同时这两个向量都是单位向量，那么则有
+\begin{align}
+    r_1^Tr_2&=0 \\
+||r_1||=||r_2||&=1
+\end{align}
+代入可得：
+\begin{align}
+    h_1^TK^{-T}K^{-1}h_2&=0 \\
+h_1^TK^{-T}K^{-1}h_1 &= h_2^TK^{-T}K^{-1}h_2
+\end{align}
+也即是说每个单应性矩阵能够提供两个方程，而内部参数矩阵\(K\)包含了5个参数，因此要进行求解需要至少三个单应性矩阵\(H\)。其中记\(B = A^{-T}A^{-1}\)，显然\(B\)为实对称矩阵，将其展开即得
+\begin{align}
+    B &=K^{-T}K^{-1}=
+\left[
+\begin{array}{ccc}
+B_{11} & B_{12} & B_{13} \\
+B_{21} & B_{22} & B_{23} \\
+B_{31} & B_{32} & B_{33}
+\end{array}
+\right] \\ &=
+\left[
+\begin{array}{ccc}
+\dfrac{1}{\alpha^2} & -\dfrac{\gamma}{\alpha^2\beta} & \dfrac{v_0\gamma-u_0\beta}{\alpha^2\beta} \\
+-\dfrac{\gamma}{\alpha^2\beta} & \dfrac{\gamma^2}{\alpha^2\beta^2}+\dfrac{1}{\beta^2} & -\dfrac{\gamma(v_0\gamma-u_0\beta)}{\alpha^2\beta^2}-\dfrac{v_0}{\beta^2} \\
+\dfrac{v_0\gamma-u_0\beta}{\alpha^2\beta} & -\dfrac{\gamma(v_0\gamma-u_0\beta)}{\alpha^2\beta^2}-\dfrac{v_0}{\beta^2} & \dfrac{(v_0\gamma-u_0\beta)^2}{\alpha^2\beta^2}+\dfrac{v_0}{\beta^2}+1
+\end{array}
+\right]
+\end{align}
+由于\(B\)为对称矩阵，因此将\(B\)的有效元素写成向量\(b\)，即
+\begin{equation}
+b=\left[ \begin{array}{cccccc} B_{11} & B_{12} & B_{22} & B_{13} & B_{23} & B_{33} \end{array} \right]^T
+\end{equation}
+那么之前的式子可以利用向量\(b\)来进行化简：
+即式子
+\begin{equation}
+    h_i^TBh_j = v^T_{ij}b
+\end{equation}
+其中的系数矩阵为
+\begin{equation}
+    v_{ij}=\left[ \begin{array}{cccccc} h_{i1}h_{j1} & h_{i1}h_{j2}+h_{i2}h_{j1} & h_{i2}h_{j2} & h_{i3}h_{j1}+h_{i1}h_{j3} & h_{i3}h_{j2}+h_{i2}h_{j3} & h_{i3}h_{j3} \end{array} \right]^T
+\end{equation}
+那么之前关于矩阵\(B\)的两个约束条件就可以写成
+\begin{equation}
+    \left[ \begin{array}{c} v^T_{12} \\ (v_{11}-v_{22})^T \end{array} \right]b=0
+\end{equation}
+因此，基于上式，通过至少三张包含棋盘格的图像，就可以解得矩阵\(B\)，再使用Cholesky分解法，就可以得到相机的内部参数矩阵\(K\)。
 
 \subsubsection{三角法}
 % https://scm_mos.gitlab.io/2018/12/08/triangulate/
@@ -102,7 +182,6 @@
 \end{equation}
 \newcommand{\mi}{第\(i\)个}
 \newcommand{\mn}{第\(n\)个}
-\newcommand{\qczb}{齐次坐标}
 其中，$w_{in}$表示\mi 相机视角下，\mn 关节点的对应的深度神经网络检测的二维位置的置信度；$\hat x_{in}$ 表示\mi 相机视角下，\mn 关节点通过深度神经网络估计的在图像平面上的位置；$X_n$为\mn 关节的三维齐次坐标。
 
 \subsection{模型应用}
