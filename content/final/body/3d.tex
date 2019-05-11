@@ -7,6 +7,7 @@
 
 \subsection{模型概述}
 \subsubsection{相机模型}
+% https://www.cnblogs.com/wangguchangqing/p/8126333.html#autoid-0-4-0
 相机进行图像拍摄的过程涉及到了多个坐标系的转换，即先从世界坐标系进行刚性变换，转换到相机坐标系，从相机坐标系进行投影变换，转换到图像坐标系，最后根据相机参数，转换到像素坐标系上，像素坐标系就是我们一般意义上所指的图像。几个坐标系的简介如下：
 \begin{description}
     \item[世界坐标系：] 是用来描述客观世界的坐标系，描述的是相机三维空间中的其他物体的值，一般用\((x_w, y_w, z_w)\)表示世界坐标系中的值。
@@ -21,22 +22,78 @@
 \end{equation}
 其中，\(R\)是一个\(3\times 3\)的旋转矩阵，\(T \in \mathbb{R}^{3}\) 表示平移向量。上式在运算的过程中需要进行加法，因此通常在进行计算时，为了简化表示，使用\qczb 来表示点在空间中的位置，从世界坐标系变换到相机坐标系时，其转换方式为
 \begin{equation}
-\left[\begin{array}{c}X_c\\Y_c\\Z_c\end{array}\right] = \left[\begin{array}{ccc}R_{11}&R_{12}&R_{13}\\R_{21}&R_{22}&R_{23}\\R_{31}&R_{32}&R_{33}\end{array}\right]\left[\begin{array}{c}X_w\\Y_w\\Z_w\end{array}\right] + \left[\begin{array}{c}t_1\\t_2\\t_3\end{array}\right]    
+    \left[\begin{array}{c}X_c\\Y_c\\Z_c\end{array}\right] = \left[\begin{array}{ccc}R_{11}&R_{12}&R_{13}\\R_{21}&R_{22}&R_{23}\\R_{31}&R_{32}&R_{33}\end{array}\right]\left[\begin{array}{c}X_w\\Y_w\\Z_w\end{array}\right] + \left[\begin{array}{c}t_1\\t_2\\t_3\end{array}\right]
 \end{equation}
 写成\qczb 的形式为
 \begin{equation}
-\left[\begin{array}{c}X_c\\Y_c\\Z_c\\1 \end{array}\right] = 
-\left[\begin{array}{cccc}R_{11}&R_{12}&R_{13}&t_1\\R_{21}&R_{22}&R_{23}&t_2\\R_{31}&R_{32}&R_{33}&t_3\\0&0&0&1\end{array}\right]
-\left[\begin{array}{c}X_w\\Y_w\\Z_w\\1\end{array}\right]
+    \left[\begin{array}{c}X_c\\Y_c\\Z_c\\1 \end{array}\right] =
+    \left[\begin{array}{cccc}R_{11}&R_{12}&R_{13}&t_1\\R_{21}&R_{22}&R_{23}&t_2\\R_{31}&R_{32}&R_{33}&t_3\\0&0&0&1\end{array}\right]
+    \left[\begin{array}{c}X_w\\Y_w\\Z_w\\1\end{array}\right]
 \end{equation}
 该转换矩阵就记为相机的外部参数\(T\):
 \begin{equation}
     T = \left[\begin{array}{cc}R&T\\0^T&1\end{array}\right]
 \end{equation}
 
+从相机坐标系变换到图像坐标系是一个从三维空间的点变换到二维空间中的点的过程，这个过程也叫射影变换。利用相似三角形原理，可以得到
+\begin{equation}
+    \left\{
+    \begin{array}{l}
+        x = f\frac{X}{Z} \\
+        y = f\frac{Y}{Z} \\
+        z = f
+    \end{array}\right.
+\end{equation}
+由于该计算过程中对\(z\)是非线性的，因此引入一个中间变量，先使用矩阵乘法进行计算
+\begin{equation}
+    \left[\begin{array}{c}\hat{x}\\\hat{y}\\\hat{z}\end{array}\right] =
+    \left[\begin{array}{cccc}f&0&0&0\\0&f&0&0\\0&0&1&0\end{array}\right]
+    \left[\begin{array}{c}X\\Y\\Z\\1\end{array}\right]
+\end{equation}
+再通过将该坐标值除以其\(z\)的值，即可得到图像坐标系的值
+\begin{equation}
+    \left\{\begin{array}{l}x=\dfrac{\hat{x}}{\hat{z}} \\y=\dfrac{\hat{y}}{\hat{z}}
+        \\z\ne0\end{array}\right.
+\end{equation}
+
+最后需要从图像坐标系转换到像素坐标系，该转换过程是一个线性变换，即是说图像坐标系中的点的坐标与像素坐标系中的点相差了一个缩放和平移。那么其计算公式就可以写为
+\begin{equation}
+    \begin{array}{c}
+        u = \alpha\cdot x+ c_x \\
+        v = \beta \cdot y + c_y
+    \end{array}
+\end{equation}
+将上面的公式代入，即可以得到
+\begin{equation}
+    \left\{\begin{array}{c}
+        u = \alpha\cdot f\frac{X}{Z}+ c_x = f_x\frac{X}{Z}+ c_x \\
+        v = \beta \cdot f\frac{Y}{Z} + c_y = f_y\frac{Y}{Z} + c_y
+    \end{array}\right.
+\end{equation}
+其中\(f_x = \alpha \cdot f,f_y = \beta \cdot f\)，同样将上式改写成\qczb 的形式，即可以得到
+\begin{equation}
+    \left[\begin{array}{c}\mu\\\nu\\1\end{array}\right] = \frac{1}{Z}\left[
+        \begin{array}{ccc}f_x&0&c_x\\0&f_y&c_y\\0&0&1\end{array}\right]\left[\begin{array}{c}X\\Y\\Z\end{array}\right]
+\end{equation}
+通过该式子，即可以得到相机的内部参数矩阵\(K\)，
+\begin{equation}
+    K=\left[
+        \begin{array}{ccc}f_x&0&c_x\\0&f_y&c_y\\0&0&1\end{array}\right]
+\end{equation}
+从相机内部参数的表达式中可以看出，其中的未知数与相机的实际物理参数有关，那么整个相机的投影过程就可以写为：
+\begin{equation}
+    Z\left[\begin{array}{c}u\\v\\1\end{array}\right] =
+    \left[\begin{array}{ccc}\frac{1}{dx}&0&c_x\\0&\frac{1}{dy}&c_y\\0&0&1\end{array}\right]
+    \left[\begin{array}{cccc}f&0&0&0\\0&f&0&0\\0&0&1&0\end{array}\right]
+    \left[\begin{array}{cc}R&t\\0^T&1\end{array}\right]
+    \left[\begin{array}{c}X_w\\Y_w\\Z_w\\1\end{array}\right]
+\end{equation}
+因此在使用相机前，需要先对相机的内部参数进行求解，求解该内部参数的过程即为标定。在标定的过程中即需要求解相机的内部参数与外部参数。接下来将介绍LightStage系统的标定过程。
 
 \subsubsection{相机标定}
-目前主流的相机标定方法是微软研究院的高级研究员张正友教授与1998年提出的一种利用单个棋盘格平面进行相机标定的方法，该方法介于传统标定法和自标定法之间，标定效果较好，并且计算复杂度低。同时不需要高精度的标定物，便于操作。因此我们使用该方法进行相机的标定。
+% https://www.cnblogs.com/wangguchangqing/p/8335131.html
+
+目前主流的相机标定方法是微软研究院的张正友教授与1998年提出的一种利用单个棋盘格平面进行相机标定的方法，该方法介于传统标定法和自标定法之间，标定效果较好，并且计算复杂度低。同时不需要高精度的标定物，便于操作。因此我们使用该方法进行相机的标定。
 
 由于LightStage系统的相机较多，与单个相机的标定方法有所区别，因此我们的标定主要分为以下步骤：
 \begin{enumerate}
@@ -49,7 +106,7 @@
     \item 对参数进行最后的优化
 \end{enumerate}
 
-\comment{这里写相机标定的内容}
+% \comment{这里写相机标定的内容}
 假设三维世界坐标系中的点的\qczb 为\(X = [x,y,z,1]^T\)，其在二维相机平面上的\qczb 为\(m = [u,v,1]^T\)。那么由相机模型的定义我们可以知道：
 
 \begin{equation}
@@ -57,18 +114,18 @@
 \end{equation}
 在进行标定时，假设棋盘格所在平面为世界坐标系中的\(Z=0\)的平面，那么则有
 \begin{equation}
-Z\left[ \begin{array}{c} u \\ v \\ 1 \end{array} \right] = K\left[ 
-    \begin{array}{cccc} r_1 & r_2 & r_3 & t\end{array}
-    \right]
-    \left[ 
-    \begin{array}{c}x \\y \\0 \\1\end{array}
-    \right]=K
-    \left[ 
-    \begin{array}{cccc} r_1 & r_2 & T\end{array}
-    \right]
-    \left[ 
-    \begin{array}{c}x \\y \\1\end{array}
-    \right]
+    Z\left[ \begin{array}{c} u \\ v \\ 1 \end{array} \right] = K\left[
+        \begin{array}{cccc} r_1 & r_2 & r_3 & t\end{array}
+        \right]
+    \left[
+        \begin{array}{c}x \\y \\0 \\1\end{array}
+        \right]=K
+    \left[
+        \begin{array}{cccc} r_1 & r_2 & T\end{array}
+        \right]
+    \left[
+        \begin{array}{c}x \\y \\1\end{array}
+        \right]
 \end{equation}
 其中\(r_1,r_2,r_3\)分别代表旋转矩阵\(R\)的列向量，令
 \begin{equation}
@@ -76,42 +133,42 @@ Z\left[ \begin{array}{c} u \\ v \\ 1 \end{array} \right] = K\left[
 \end{equation}
 该矩阵即为棋盘格平面到像素平面的变换矩阵，记为单应性矩阵。\(H\)是一个齐次矩阵，因此有8个未知数，至少需要8个方程来进行求解。由上式可得：
 \begin{align}
-    \lambda &= \frac{1}{Z} \\
-    r_1 &= \frac{1}{\lambda} K^{-1}h_1 \\
-    r_2 &= \frac{1}{\lambda} K^{-1}h_2
+    \lambda & = \frac{1}{Z}                 \\
+    r_1     & = \frac{1}{\lambda} K^{-1}h_1 \\
+    r_2     & = \frac{1}{\lambda} K^{-1}h_2
 \end{align}
 
 由于\(R\)是旋转矩阵，\(r_1, r_2\)分别是旋转矩阵的两列，因此这两个向量正交，同时这两个向量都是单位向量，那么则有
 \begin{align}
-    r_1^Tr_2&=0 \\
-||r_1||=||r_2||&=1
+    r_1^Tr_2        & =0 \\
+    ||r_1||=||r_2|| & =1
 \end{align}
 代入可得：
 \begin{align}
-    h_1^TK^{-T}K^{-1}h_2&=0 \\
-h_1^TK^{-T}K^{-1}h_1 &= h_2^TK^{-T}K^{-1}h_2
+    h_1^TK^{-T}K^{-1}h_2 & =0                     \\
+    h_1^TK^{-T}K^{-1}h_1 & = h_2^TK^{-T}K^{-1}h_2
 \end{align}
 也即是说每个单应性矩阵能够提供两个方程，而内部参数矩阵\(K\)包含了5个参数，因此要进行求解需要至少三个单应性矩阵\(H\)。其中记\(B = A^{-T}A^{-1}\)，显然\(B\)为实对称矩阵，将其展开即得
 \begin{align}
-    B &=K^{-T}K^{-1}=
-\left[
-\begin{array}{ccc}
-B_{11} & B_{12} & B_{13} \\
-B_{21} & B_{22} & B_{23} \\
-B_{31} & B_{32} & B_{33}
-\end{array}
-\right] \\ &=
-\left[
-\begin{array}{ccc}
-\dfrac{1}{\alpha^2} & -\dfrac{\gamma}{\alpha^2\beta} & \dfrac{v_0\gamma-u_0\beta}{\alpha^2\beta} \\
--\dfrac{\gamma}{\alpha^2\beta} & \dfrac{\gamma^2}{\alpha^2\beta^2}+\dfrac{1}{\beta^2} & -\dfrac{\gamma(v_0\gamma-u_0\beta)}{\alpha^2\beta^2}-\dfrac{v_0}{\beta^2} \\
-\dfrac{v_0\gamma-u_0\beta}{\alpha^2\beta} & -\dfrac{\gamma(v_0\gamma-u_0\beta)}{\alpha^2\beta^2}-\dfrac{v_0}{\beta^2} & \dfrac{(v_0\gamma-u_0\beta)^2}{\alpha^2\beta^2}+\dfrac{v_0}{\beta^2}+1
-\end{array}
-\right]
+    B & =K^{-T}K^{-1}=
+    \left[
+        \begin{array}{ccc}
+            B_{11} & B_{12} & B_{13} \\
+            B_{21} & B_{22} & B_{23} \\
+            B_{31} & B_{32} & B_{33}
+        \end{array}
+        \right]        \\ &=
+    \left[
+        \begin{array}{ccc}
+            \dfrac{1}{\alpha^2}                       & -\dfrac{\gamma}{\alpha^2\beta}                                            & \dfrac{v_0\gamma-u_0\beta}{\alpha^2\beta}                                 \\
+            -\dfrac{\gamma}{\alpha^2\beta}            & \dfrac{\gamma^2}{\alpha^2\beta^2}+\dfrac{1}{\beta^2}                      & -\dfrac{\gamma(v_0\gamma-u_0\beta)}{\alpha^2\beta^2}-\dfrac{v_0}{\beta^2} \\
+            \dfrac{v_0\gamma-u_0\beta}{\alpha^2\beta} & -\dfrac{\gamma(v_0\gamma-u_0\beta)}{\alpha^2\beta^2}-\dfrac{v_0}{\beta^2} & \dfrac{(v_0\gamma-u_0\beta)^2}{\alpha^2\beta^2}+\dfrac{v_0}{\beta^2}+1
+        \end{array}
+        \right]
 \end{align}
 由于\(B\)为对称矩阵，因此将\(B\)的有效元素写成向量\(b\)，即
 \begin{equation}
-b=\left[ \begin{array}{cccccc} B_{11} & B_{12} & B_{22} & B_{13} & B_{23} & B_{33} \end{array} \right]^T
+    b=\left[ \begin{array}{cccccc} B_{11} & B_{12} & B_{22} & B_{13} & B_{23} & B_{33} \end{array} \right]^T
 \end{equation}
 那么之前的式子可以利用向量\(b\)来进行化简：
 即式子
@@ -140,12 +197,12 @@ b=\left[ \begin{array}{cccccc} B_{11} & B_{12} & B_{22} & B_{13} & B_{23} & B_{3
 第$i$个相机的参数矩阵为
 \begin{equation}
     P_i = K_i[R_i | t_i] = \left[ \begin{array}{c}
-        P_{i1} \\ P_{i2} \\ P_{i3}
-    \end{array}\right]  
+            P_{i1} \\ P_{i2} \\ P_{i3}
+        \end{array}\right]
 \end{equation}
 点$X$在第$i$个相机中的投影的坐标为
 \begin{equation}
-    \bm{x_i} = (x_i, y_i, 1)^T    
+    \bm{x_i} = (x_i, y_i, 1)^T
 \end{equation}
 根据投影方程，即有
 \begin{equation}
@@ -157,15 +214,15 @@ b=\left[ \begin{array}{cccccc} B_{11} & B_{12} & B_{22} & B_{13} & B_{23} & B_{3
 \end{equation}
 展开即可得到：
 \begin{align}
-    x_i(P_{i3}\bm{X}) &- P_{i1}\bm{X} = 0 \\
-    y_i(P_{i3}\bm{X}) &- P_{i2}\bm{X}= 0 \\
-    x_i(P_{i2}\bm{X}) &- y_iP_{i1}\bm{X}= 0
+    x_i(P_{i3}\bm{X}) & - P_{i1}\bm{X} = 0   \\
+    y_i(P_{i3}\bm{X}) & - P_{i2}\bm{X}= 0    \\
+    x_i(P_{i2}\bm{X}) & - y_iP_{i1}\bm{X}= 0
 \end{align}
 第三个方程与前两个方程线性相关，因此该组方程实际只提供了两个自由度，即
 \begin{align}
     \left[ \begin{array}{c}
-        x_iP_{i3} - P_{i1} \\ y_iP_{i3} - P_{i2}
-    \end{array}\right]\bm{X} = \bm{0}
+            x_iP_{i3} - P_{i1} \\ y_iP_{i3} - P_{i2}
+        \end{array}\right]\bm{X} = \bm{0}
 \end{align}
 因此每个相机上的一个观察点提供了两个约束，而该点的坐标有三个自由度，因此至少需要两个视角才能解出一个点的坐标。而我们的能用的视角个数大于两个，也就是说需要求解超定方程。即求解超静定的齐次线性方程
 \begin{equation}
@@ -174,19 +231,19 @@ b=\left[ \begin{array}{cccccc} B_{11} & B_{12} & B_{22} & B_{13} & B_{23} & B_{3
 因此我们采用SVD分解的方法，计算$A$矩阵奇异值最小的对应的奇异向量，就是三维坐标的解。那么我们的问题即为假定未知的所有的关节的三维点的坐标为$S\in \mathbb{R}^{3\times N}$，$N$为关节点的数目，第$i$ 个相机的参数为$R_i,T_i,K_i$。那么该问题的方程可写为：
 \begin{equation}
     \left[ \begin{array}{c}
-        x_{n0}P_{03} - P_{01} \\ 
-        y_{n0}P_{03} - P_{02} \\
-        x_{n1}P_{13} - P_{11} \\ 
-        y_{n1}P_{13} - P_{12} \\
-        \vdots \\
-        x_{ni}P_{i3} - P_{i1} \\ 
-        y_{ni}P_{i3} - P_{i2} 
-    \end{array}\right] \left[ \begin{array}{c}
-        X_n \\
-        Y_n\\
-        Z_n\\
-        1 
-    \end{array}\right]  = \bm{0}, n = 1,2,\ldots,N
+            x_{n0}P_{03} - P_{01} \\
+            y_{n0}P_{03} - P_{02} \\
+            x_{n1}P_{13} - P_{11} \\
+            y_{n1}P_{13} - P_{12} \\
+            \vdots                \\
+            x_{ni}P_{i3} - P_{i1} \\
+            y_{ni}P_{i3} - P_{i2}
+        \end{array}\right] \left[ \begin{array}{c}
+            X_n \\
+            Y_n \\
+            Z_n \\
+            1
+        \end{array}\right]  = \bm{0}, n = 1,2,\ldots,N
 \end{equation}
 对于所有关节点，求解方程即可获得所有关节点的三维空间坐标。
 
@@ -199,7 +256,7 @@ b=\left[ \begin{array}{cccccc} B_{11} & B_{12} & B_{22} & B_{13} & B_{23} & B_{3
 \end{equation}
 投影坐标即为
 \begin{equation}
-    \bm{x_i} = Z_i^{-1}K_i(R_i\bfX + T_i)    
+    \bm{x_i} = Z_i^{-1}K_i(R_i\bfX + T_i)
 \end{equation}
 那么根据各个视角下的观测到的二维坐标，我们的目标函数可以写为
 \begin{equation}
@@ -207,7 +264,7 @@ b=\left[ \begin{array}{cccccc} B_{11} & B_{12} & B_{22} & B_{13} & B_{23} & B_{3
 \end{equation}
 将投影坐标表达式代入，即得
 \begin{equation}
-    \min \sum^I_{i=1} \sum_{n=1}^N w_{in}||Z_i^{-1}K_i(R_iX_n + T_i) - \hat x_{in}||_2  
+    \min \sum^I_{i=1} \sum_{n=1}^N w_{in}||Z_i^{-1}K_i(R_iX_n + T_i) - \hat x_{in}||_2
 \end{equation}
 \newcommand{\mi}{第\(i\)个}
 \newcommand{\mn}{第\(n\)个}
