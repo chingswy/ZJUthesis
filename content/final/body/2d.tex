@@ -11,11 +11,44 @@
 下面依次介绍这几种模型。
 \subsubsection{OpenPose}
 OpenPose是由CMU提出的多人二维关键点实时检测方案，该方案是基于自底向上的思想的。该方法使用了一种叫部件亲和场(PAF)的非参数表示方法，通过这种方法将检测出来的人体关节组合起来。该方法具有较高的精度以及较好的实时性。该方法可以同时对人体的身体部分、双脚、手部关节点、脸部关键点进行检测，输出结果较为丰富。
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=.4\linewidth]{figure/2dpose/openpose}
+    \caption{\label{fig:2d-op} OpenPose流程图}
+\end{figure}
 
 \subsubsection{AlphaPose}
 AlphaPose使用的是自顶向下的方法，
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=.4\linewidth]{figure/2dpose/alphapose}
+    \caption{\label{fig:2d-ap} AlpahPose流程图}
+\end{figure}
 
-\comment{这里应该有个结果比较}
+\subsubsection{CPN}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=.4\linewidth]{figure/2dpose/cpn}
+    \caption{\label{fig:2d-cpn} CPN流程图}
+\end{figure}
+
+\subsection{模型比较}
+为了验证上述二维关节点检测模型在我们的实验环境下的准确度，我们需要对其进行定量的分析。由于我们的实验设备没有在人身上贴标签，因此无法得到准确的三维关键点以及二维关节点的坐标，因此我们选择了广泛使用的Human3.6M数据集。该数据集是最大的人体三维姿态数据集之一，包含了360万的图片，其中包括了11个演员以及15个日常动作，例如吃饭，走路等。该数据集的采集环境为室内环境，并且使用了总共4个相机来进行数据采集。该数据集通过在人体贴上标志物来获得人体的三维空间的关节位置，相对于从图片直接估计来说较为准确，因此我们通过该数据集来对我们的算法进行定量分析。
+
+在这一部分中，我们使用Human3.6M数据集的图片，通过三种不同的人体二维关节点检测方法获得其关节位置，与其提供的二维关节点的位置进行比较，计算三种方法的误差。由于二维关节点的训练数据集中，关节的位置通常都是由人类标注者进行标注，而Human3.6M的关节点的位置是由其贴的标志的位置决定的，因此两者的关节定义有所不同，而在三种二维关节点检测方法中，其各自使用的训练数据集也有所区别，因此我们只选择了人的身体上的主要的几个点进行比较。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=.4\linewidth]{figure/2dpose/compare}
+    \caption{\label{fig:2d-compare} 三种二维人体关节点检测方法结果比较}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=.4\linewidth]{figure/2dpose/compare}
+    \caption{\label{fig:2d-loss} 各个关节的误差分布对比}
+\end{figure}
+
 
 \subsection{应用}
 \comment{这里主要写将模型拿来应用到我们的数据上，以及结果}
