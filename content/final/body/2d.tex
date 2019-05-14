@@ -10,27 +10,30 @@
 \end{itemize}
 下面依次介绍这几种模型。
 \subsubsection{OpenPose}
-OpenPose是由CMU提出的多人二维关键点实时检测方案，该方案是基于自底向上的思想的。该方法使用了一种叫部件亲和场(PAF)的非参数表示方法，通过这种方法将检测出来的人体关节组合起来。该方法具有较高的精度以及较好的实时性。该方法可以同时对人体的身体部分、双脚、手部关节点、脸部关键点进行检测，输出结果较为丰富。
+OpenPose是由CMU提出的多人二维关键点实时检测方案，该方案是基于自底向上的思想的。该方法使用了一种叫部件亲和场(Part Affinity Fields，简称PAF)的非参数表示方法，通过这种方法将检测出来的人体关节组合起来。部件亲和场的表示方法是指，对于人体上的骨架上的每一个像素，去回归这一段骨架的方向向量。该方法具有较高的精度以及较好的实时性。该方法可以同时对人体的身体部分、双脚、手部关节点、脸部关键点进行检测，输出结果较为丰富。
 \begin{figure}[H]
     \centering
-    \includegraphics[width=.4\linewidth]{figure/2dpose/openpose}
+    \includegraphics[width=\linewidth]{figure/2dpose/openpose}
     \caption{\label{fig:2d-op} OpenPose流程图}
 \end{figure}
+该方法主要分为几个步骤，首先对于一张输入的图片，OpenPose将整张图片都输入给深度卷积神经网络，通过网络同时去回归人体的独立的关节点的位置，以及部件亲和场。通过对回归的结果进行组合将候选的关节进行组合，匹配属于同一个人的关节，最后就能得到整个人体的完整的身体姿态。
 
 \subsubsection{AlphaPose}
-AlphaPose使用的是自顶向下的方法，
+AlphaPose是上海交通大学卢策吾教授团队开源的二维人体关键点检测方法，该方法使用的是自顶向下的方法，即首先检测人体所在的框的区域，再对框中的人体进行关键点检测。首先通过区域候选网络(Region Proposal Network)提出候选的人体区域，然后将所得到的所有的候选的人体区域框分为两支，一支通过单人姿态估计(Single Person Pose Estimation)算法，以及姿态非极大值抑制算法得到姿态，另一支直接通过单人姿态估计得到人体的姿态，最后将两支分路的结果进行整合，得到最终的人体姿态。 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=.4\linewidth]{figure/2dpose/alphapose}
+    \includegraphics[width=\linewidth]{figure/2dpose/alphapose}
     \caption{\label{fig:2d-ap} AlpahPose流程图}
 \end{figure}
 
 \subsubsection{CPN}
+级联金字塔网络(Cascaded Pyramid Network, 简称CPN)是有旷视科技提出的模型，该模型取得了COCO2017人体关键点挑战赛的冠军，该模型主要面向的问题是单张图片中的多人姿态估计问题。该模型属于自顶向下的方法，即首先生成人体的边界框，之后对单个人体的框进行关键点检测。级联金字塔网络包含了两个阶段，第一个阶段为全局网络(GlobalNet)，这部分用来从图像中提取特征，可以定位特征较为明显的关键点，例如手和脚，但是无法直接从图片中识别出被遮挡的关键点；第二个阶段为精炼网络(RefineNet)，这一阶段主要通过整合全局网络中识别得到的图片特征，来推断被遮挡住的关键点的位置。即是说理解可以看到的关键点所提供的上下文信息，完成所有关键点的检测任务。
 \begin{figure}[H]
     \centering
     \includegraphics[width=.4\linewidth]{figure/2dpose/cpn}
     \caption{\label{fig:2d-cpn} CPN流程图}
 \end{figure}
+论文中的全局网络的骨架是深度残差网络\cite{resnet}，通过使用U形结构来整合不通尺度的空间分辨率的特征以及语义信息。精炼网络部分中，为了提高计算的效率，同时保持信息在传输过程中的完整性，精炼网络部分首先讲不同尺度的特征图进行堆叠，然后通过上采样和融合，将不同层次的信息进行融合。
 
 \subsection{模型比较}
 为了验证上述二维关节点检测模型在我们的实验环境下的准确度，我们需要对其进行定量的分析。由于我们的实验设备没有在人身上贴标签，因此无法得到准确的三维关键点以及二维关节点的坐标，因此我们选择了广泛使用的Human3.6M数据集。该数据集是最大的人体三维姿态数据集之一，包含了360万的图片，其中包括了11个演员以及15个日常动作，例如吃饭，走路等。该数据集的采集环境为室内环境，并且使用了总共4个相机来进行数据采集。该数据集通过在人体贴上标志物来获得人体的三维空间的关节位置，相对于从图片直接估计来说较为准确，因此我们通过该数据集来对我们的算法进行定量分析。
@@ -49,6 +52,21 @@ AlphaPose使用的是自顶向下的方法，
     \caption{\label{fig:2d-loss} 各个关节的误差分布对比}
 \end{figure}
 
+\begin{table}[H]
+    \centering
+    \begin{tabular}{lccc}
+        \hline
+         Name       &   OpenPose &     CPN &   AlphaPose \\
+        \hline
+         \text{误差均值（像素）}   &    9.62135 & 9.32769 &     8.78416 \\
+         \text{误差标准差} &    6.35488 & 7.85625 &     4.63783 \\
+        \hline
+    \end{tabular}
+    \label{tab:plan}%
+    \caption{三种二维检测人体方法的误差}
+\end{table}
+
 
 \subsection{应用}
-\comment{这里主要写将模型拿来应用到我们的数据上，以及结果}
+基于以上比较，我们发现\comment{模型}的精度较高，因此我们选择使用该模型在我们的模型上应用。部分图片的二维人体关节点检测结果如图所示。从二维关节点检测结果可以看出，目前的二维人体关节点模型可以在我们的数据上取得较好的结果。基于这一部分的结果，我们才能对人体的三维关节点进行重建。
+
