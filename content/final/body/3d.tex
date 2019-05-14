@@ -270,6 +270,19 @@
 \newcommand{\mn}{第\(n\)个}
 其中，$w_{in}$表示\mi 相机视角下，\mn 关节点的对应的深度神经网络检测的二维位置的置信度；$\hat x_{in}$ 表示\mi 相机视角下，\mn 关节点通过深度神经网络估计的在图像平面上的位置；$X_n$为\mn 关节的三维齐次坐标。
 
+\subsection{图结构}
+后验分布写为
+\begin{equation}
+    p ( \boldsymbol { T } | I ) \propto \prod _ { v = 1 } ^ { V } \prod _ { i = 1 } ^ { N } p \left( I _ { v } | \pi _ { v } \left( \boldsymbol { t } _ { i } \right) \right) \prod _ { ( i , j ) \in \varepsilon } p \left( \boldsymbol { t } _ { i } , \boldsymbol { t } _ { j } \right)
+\end{equation}
+其中$\pi_i(bm{t}_n)$表示\mi 相机视角下，\mn 关节点的二维投影坐标值。似然概率\(p(I_v|\pi_i(bm{t}_n))\) 由深度卷积网络进行二维检测时输出的热度图给出，这个似然函数描述了每个关节的空间分布概率。先验项\(p(t_i, t_j)\)表示关节\(i\)和关节\(j\)的结构依赖关系，这一项约束了两个关节点的骨架长度。我们使用一个高斯分布来对这一项先验进行建模，即
+\begin{equation}
+    p \left( \boldsymbol { t } _ { i } , \boldsymbol { t } _ { j } \right) \propto N \left( \left\| \boldsymbol { t } _ { i } - \boldsymbol { t } _ { j } \right\| L _ { i j } , \sigma _ { i j } \right)
+\end{equation}
+其中，\(\left\| \boldsymbol { t } _ { i } - \boldsymbol { t } _ { j } \right\|\) 表示关节点\(\boldsymbol { t } _ { i } , \boldsymbol { t } _ { j } \)的欧几里得距离，\(L _ { i j }, \sigma _ { i j }\)依次表示骨架长度的均值和方差。这一项可以从人体的三维姿态数据集中先统计得出，作为我们的先验。
+
+推理：一般的最大化似然函数\(p ( \boldsymbol { T } | I )\)的方法是，先将状态空间离散化，成为一个三维空间的网格结构，接着使用最大积(max-product)算法\cite{max-product}。然而随着状态空间的维度的增加，最大积算法的计算复杂度增长得十分快，效率较低。因此我们没有采用对空间网格进行划分的办法，由于我们前一步已经通过三角法获得了关节的三维空间位置的值
+
 \subsection{模型应用}
 \comment{写在LightStage数据上采集得到的结果}
 
