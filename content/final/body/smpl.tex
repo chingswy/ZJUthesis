@@ -3,12 +3,33 @@
 在上一部分中，我们已经从图片中得到人体的三维关节点的坐标，但是在实际应用中，简单的骨架表示不够具有表现力，因此最新的论文里的做法是使用一个预先生成好的参数化的人体几何模型，通过优化算法，或者直接通过网络估计，得到该模型的参数。在我们的问题中，希望通过输入一个人体的骨架的三维坐标，输出该参数化模型的参数。由于骨架坐标无法完全确定该模型的参数，因此我们需要引入一些额外的约束，来完成该求解过程。
 
 \subsection{模型介绍}
-\comment{这里写SMPL的模型介绍，找一篇论文对照着写一下}
 SMPL模型是一个高效的线性人体模型，模型总共定义了\(N = 6890\)个顶点，作为人体的模板\(\bar{\bm{T}}\)。为了使该模型能够描述不同的人体姿态，该模型定义了人体的24个关节，每个关节具有三个旋转的自由度（包括整个身体的旋转），再加上身体的平移的三个自由度，该模型使用了\(3\times 24 + 3 = 75\)个位姿参数\(\theta\)来描述人体的姿态。为了能够描述不同人体的形状的差异，模型使用了形状参数\(\beta\)来对人体模板的点进行非刚性变形。也就是说，人体模板首先会根据形状参数和姿态参数进行变形：
 \begin{equation}
-    T(\beta, \theta) = \bar{\bm{T}} + B_s
+    T(\beta, \theta) = \bar{\bm{T}} + B_S(\beta) + B_P(\theta)
 \end{equation}
+这里的\(B_S(\beta)\)是一个形状混合函数，他将形状参数\(\beta \in \mathbb{R}^{|\beta|}\)映射到人的模型的顶点所在的空间内，即\(B_S(\beta):\mathbb{R}^{|\beta|} \mapsto \mathbb{R}^{3N}\)。这里的\(B_P(\beta)\)是一个依赖于姿势的形状混合函数，他将姿势参数\(\theta \in \mathbb{R}^{|\theta|}\)同样映射到人的模型的顶点所在的空间内，即\(B_P(\beta):\mathbb{R}^{|\theta|} \mapsto \mathbb{R}^{3N}\)，这一项考虑的是人体在进行不同的动作的时候，对身体的造成的形变。这两项形状混合函数都是直接将点的坐标加到人体的静止姿态下，也就是说先对人体的静止姿态进行变形，完成对形状的改变。在这之后，再对人体模型上的所有点进行混合蒙皮操作(blend skinning)，将非关键点的位置进行旋转平移，得到经过姿势变换后的人体模型上的点的位置。
 
+\textbf{混合蒙皮(Blend skinning)：}这一步的目的是为了根据输入的姿态参数\(theta\)将人体的网格模型进行变形。人体的姿态参数的定义是，对于每个关节，使用轴角(axis-angle)来表示他的旋转。由于每一个旋转矩阵只有三个自由度，所以一般的表示方法都是使用参数化的表示。常用的参数化的方法是使用欧拉角，但是欧拉角会带来万向锁的问题，因为欧拉角表示并没有覆盖旋转矩阵空间内的所有区域。并且，欧拉角使用角度来进行表示，这样在进行优化的时候其值的范围是有周期性的，不连续，使得优化过程不自然，因此选择了使用轴角表示。
+
+对于我们的骨架模型，有\(K=23\)个关节表示旋转，加上人整体的旋转，姿势参数即为\(\theta = [\omega_0^T, \omega_1^T, \ldots, \omega_K^T]\)，其中的每一个\(\omega\)是一个三维的向量，\(\omega\)的模长\(||\omega||\)表示旋转的角度，\(\frac{\omega}{||\omega||}\)表示旋转的方向的单位向量。为了在计算的时候表示旋转，通常会需要先转换成旋转矩阵。旋转向量转化成旋转矩阵的方法是通过罗德里格斯公式(Rodrigues formula):
+
+\begin{equation}
+    \exp \left(  \omega  _ { j } \right) = \mathcal { I } + \widehat { \overline { \omega }} _ { j } \sin \left( \left\|  \omega  _ { j } \right\| \right) + \widehat { \overline { \omega } } _ { j } ^ { 2 } \cos \left( \left\| \omega_ { j } \right\| \right)
+\end{equation}
+其中\(\overline { \omega } = \frac{\omega}{||\omega||}\)表示旋转轴的单位向量，\(\widehat { \overline { \omega }}\)表示关于三维向量\(\overline{\omega}\)的反对称矩阵，即对于向量\(\mathbf{K} = [k_x, k_y, k_z]^T\)，其计算公式为
+\begin{equation}
+\widehat{\mathbf { K }} = \left[ \begin{array} { c c c } { 0 } & { - k _ { z } } & { k _ { y } } \\ { k _ { z } } & { 0 } & { - k _ { x } } \\ { - k _ { y } } & { k _ { x } } & { 0 } \end{array} \right]
+\end{equation}
+\(\mathcal { I }\)表示\(3\times 3\)的单位矩阵。那么通过这一步计算，我们即将所有的\(K \times 3\)的旋转向量转换成了\(K\times 3 \times 3\)的旋转矩阵。由于在进行点的坐标计算的时候，一般都使用齐次坐标来表示点的位置，因此我们需要将旋转矩阵扩充为\(4\times 4\)的齐次变换矩阵。也即是说对于每个关节，都有一个局部的齐次变换矩阵，写为
+\begin{equation}
+\left[ \begin{array} { c | c } { \exp \left( \vec { \omega } _ { j } \right) } & { \mathbf { j } _ { j } } \\ \hline \overrightarrow { 0 } & { 1 } \end{array} \right]
+\end{equation}
+计算该关节相对于全局坐标系的齐次变换矩阵时，即需要根据骨架连接的顺序，依次将各个关节的局部变换矩阵相乘，即可得到该关节的全局变换矩阵，即
+\begin{equation}
+    G _ { k } ( \vec { \theta } , \mathbf { J } ) = \prod _ { j \in A ( k ) } \left[ \begin{array} { c | c } { \exp \left( \vec { \omega } _ { j } \right) } & { \mathbf { j } _ { j } } \\ \hline \overrightarrow { 0 } & { 1 } \end{array} \right]
+\end{equation}
+其中，\(A(k)\)表示对于关节\(k\)，其所有父节点的按连接顺序排列的有序集合。\comment{插个图片，距离}。该式子表示，对于关节\(k\)，其全局变换矩阵的计算为其父节点的全局变换矩阵的依次矩阵相乘。\(\mathbf{j}_j\)表示关节\(j\)的相对于其父节点的位移，其长度即为该段骨长。
+ 
 \subsection{算法分析}
 \comment{这里写如何Fit，就是简单的loss函数}
 
