@@ -20,19 +20,19 @@
 {
     \fancyhead{}
     \fancyhead[EL]{\zihao{-5} 浙江大学本科生毕业论文（设计）}
-    \fancyhead[OL]{\zihao{-5} 浙江大学本科生毕业论文（设计）}
-    \fancyhead[OR]{\zihao{-5}}
+    \fancyhead[OR]{\zihao{-5} \Title}
     \renewcommand{\headrulewidth}{0.6pt}
+    \fancyfoot{}
+    \fancyfoot[OC,EC]{\zihak{-5} \thepage}
 }
 
-\newcommand{\newhead}[1]
+\newcommand{\varyhead}[1]
 {
     \fancyhead{}
-    \fancyhead[EL]{\zihao{-5} 浙江大学本科生毕业论文（设计）}
-    \fancyhead[OL]{\zihao{-5} 浙江大学本科生毕业论文（设计）}
-    \fancyhead[OR]{\zihao{-5} #1}
-    \fancyhead[ER]{\zihao{-5} #1}
+    \fancyhead[EL, OL]{\zihao{-5} 浙江大学本科生毕业论文（设计）}
+    \fancyhead[ER, OR]{\zihao{-5} #1}
     \renewcommand{\headrulewidth}{0.6pt}
+
 }
 
 % Common page header & footer
@@ -66,12 +66,11 @@
     \renewcommand{\headrulewidth}{0pt}
 }
 
-\fancypagestyle{contenthead}
+\fancypagestyle{reviewstyle}
 {
-    \newhead{目录}
-    \fancyfoot{}
-    \fancyfoot[OC,EC]{\zihao{-5}\thepage}
+    \varyhead{文献综述}
 }
+
 \fancypagestyle{wxzshead}
 {
     \newhead{文献综述}
@@ -101,7 +100,9 @@
 }
 % Set default page styles
 \pagestyle{common}
-\assignpagestyle{\chapter}{common}
+% \assignpagestyle{\chapter}{common}
+\assignpagestyle{\chapter}{reviewstyle}
+
 \tocloftpagestyle{previous}
 
 % TOC side pane fixup
