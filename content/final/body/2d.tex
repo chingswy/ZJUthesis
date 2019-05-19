@@ -92,7 +92,7 @@ AlphaPose\cite{AlphaPose}是上海交通大学卢策吾教授团队开源的二�
 \subsubsection{测试结果}
 我们取了Human3.6M数据集中的一段视频，该段视频包含了5783帧，时长为1分57秒，视频帧率为50帧每秒。每一个相机拍摄的图片的分辨率为\(1000\times 1002\)，与我们的图片的分辨率接近。每一帧有四个视角的相机，即总共有23132张图片，我们对所有的图片都测试了一遍三种模型，得到其各自的结果，运行环境为CPU为 Intel i7-8700，8G RAM，显卡为GeForce GTX 1060 6GB GPU，系统平台为Ubuntu 16.04。OpenPose的源代码为C++实现，需要对源代码进行编译，得到可执行文件运行；AlphaPose基于PyTorch实现，需要配置PyTorch 1.0版本的环境；CPN是基于TensorFlow实现的代码，配置TensorFlow 1.9.0版本即可运行代码。代码配置过程此处省略不表。
 
-三种模型的二维关键点检测结果如图\ref{fig:h36mres}所示。从可视化的结果来看，三种模型的检测结果基本一致，我们需要进一步的定量计算。
+三种模型的二维关键点检测结果如图\ref{fig:h36mres}所示。从可视化的结果来看，三种模型的检测结果基本一致，我们需要进一步的定量计算。在这里计算时，由于网络输出具有不确定性，对每个关节的结果都会由一个范围为\((0,1)\)的置信度，我们这里进行量化的时候只考虑那些置信度大于0.5的关节检测结果。首先计算三种方法的检测的平均关节误差，如表\ref{tab:2derror}所示。从表\ref{tab:2derror}中可以看出，AlphaPose的误差均值最低，并且数据的离散程度也较低。OpenPose方法虽然在多人的场景下表现较好，但是在这种单人背景简单的场景下表现不如自顶向下的两种方法。
 \begin{table}[H]
     \centering
     \begin{tabular}{lccc}
@@ -106,6 +106,7 @@ AlphaPose\cite{AlphaPose}是上海交通大学卢策吾教授团队开源的二�
     \caption{三种二维检测人体方法的误差\label{tab:2derror}}
 \end{table}
 
+为了更直观的观察其误差，我分别计算了各个关节的误差的分布，并统计了各个关节误差的直方图，如图\ref{fig:2d-loss}所示。从表\ref{tab:2derrorjoint}中可以看出，对于接近人的躯干的部位，如臀部和肩部，其误差的波动大多比处于人的躯干末端的部位小。从误差的直方图中可以看出，对于躯干上的关节点（躯干只左右肩、左右臀部），其误差分布比较接近正态分布，数据都集中在一块，且极差相对较小。而对于属于手和脚的关节点，如图\ref{fig:2d-loss}的第二、三列所示，会出现极个别的误差特别大的点。经过可视化发现，这些误差大的地方主要是人的左右出现了误匹配的情况，因此其置信度较大，但是实际上是匹配错误的，这也是深度神经网络的缺陷之一。因此我们需要在接下来的工作中考虑如何去除掉这些误匹配的离群点，如何利用多视图的信息来对离群点进行剔除。
 \begin{table}[H]
     \centering
     \begin{tabular}{lcccccc}
@@ -125,7 +126,7 @@ AlphaPose\cite{AlphaPose}是上海交通大学卢策吾教授团队开源的二�
         \end{tabular}
     \caption{三种二维检测人体方法的各关节误差（单位：像素）\label{tab:2derrorjoint}}
 \end{table}
-从表\ref{tab:2derror}中可以看出，AlphaPose的误差均值最低，并且数据的离散程度也较低，为了更直观的观察其误差，我分别计算了各个关节的误差的分布（只保留置信度大于0.5的检测结果），并统计了各个关节误差的直方图，如图\ref{fig:2d-loss}所示。从图中可以看出，对于躯干上的关节点（躯干只左右肩、左右臀部），其误差分布比较接近正态分布，数据都集中在一块，且最大值不会特别大。而对于属于手和脚的关节点，如图\ref{fig:2d-loss}的第二、三列所示，会出现极个别的误差特别大的点。经过可视化发现，这些误差大的地方主要是人的左右出现了误匹配的情况，因此其置信度较大，但是实际上是匹配错误的，这也是深度神经网络的缺陷之一。因此我们需要在接下来的工作中考虑如何去除掉这些误匹配的离群点。
+
 
 \begin{figure}[htbp]
     \centering
@@ -135,41 +136,60 @@ AlphaPose\cite{AlphaPose}是上海交通大学卢策吾教授团队开源的二�
 
 基于以上比较，我们发现AlphaPose的精度较高，因此我们选择使用该模型在我们的模型上应用。部分图片的二维人体关节点检测结果如图所示。从二维关节点检测结果可以看出，目前的二维人体关节点模型可以在我们的数据上取得较好的结果。基于这一部分的结果，我们才能对人体的三维关节点进行重建。
 
-\unsure{}{在CMU数据集上也需要测一下，但是他们那个没有2d的GT需要自己投影一下}
+% \unsure{}{在CMU数据集上也需要测一下，但是他们那个没有2d的GT需要自己投影一下}
 
 \subsection{应用}
 在对三种二维检测模型进行比较之后，我们选择了AlphaPose作为我们的二维检测工具，我们采集了三个不同的人的数据，并使用了AlphaPose在数据上进行了应用，得到的部分结果如图\ref{fig:ls2d}所示。图中包含了两个不同的角色的总共四个不同的相机视角。从图中我们可以看出，目前的前沿的二维人体检测方法具有较好的泛化能力，可以在不同的光照条件、人体大小、外观衣着下都能取得好的结果。
 
-462s 1200帧。
+\begin{figure}[htbp]
+    \centering
+    \subfigure[演员冯]{
+        \begin{minipage}[t]{0.3\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{figure/2dpose/feng_ap} %
+        \end{minipage}% 
+    }% 
+    \subfigure[演员帅]{
+        \begin{minipage}[t]{0.3\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{figure/2dpose/shuai_ap} %
+        \end{minipage}% 
+    }%
+    \subfigure[演员柯]{
+        \begin{minipage}[t]{0.3\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{figure/2dpose/ke_ap} %
+        \end{minipage}% 
+    }%  
+    \caption{人体二维检测框架AlphaPose在LightStage数据上的应用结果\label{fig:ls2d}}
+\end{figure}
+
+尽管OpenPose在精度上低于AlphaPose，但是该模型能够同时检测图片中的手部关键点、脸部关键点，以及脚部关键点。因此我们同样使用该模型在我们的数据上进行了测试，并对结果进行了可视化。实验环境为Ubuntu 16.04, GPU GeForce GTX 1060 6GB，平均运行时间为2.59帧每秒。
 
 \begin{figure}[htbp]
     \centering
-    \subfigure[演员1相机10]{
-        \begin{minipage}[t]{0.23\linewidth}
+    \subfigure[演员冯]{
+        \begin{minipage}[t]{0.3\linewidth}
             \centering
-            \includegraphics[width=\linewidth]{figure/2dpose/231_10_0} %
+            \includegraphics[width=\linewidth]{figure/2dpose/feng_op} %
         \end{minipage}% 
     }% 
-    \subfigure[演员1相机23]{
-        \begin{minipage}[t]{0.23\linewidth}
+    \subfigure[演员帅]{
+        \begin{minipage}[t]{0.3\linewidth}
             \centering
-            \includegraphics[width=\linewidth]{figure/2dpose/231_23_0} %
+            \includegraphics[width=\linewidth]{figure/2dpose/shuai_op} %
         \end{minipage}% 
     }%
-    \subfigure[演员2相机4]{
-        \begin{minipage}[t]{0.23\linewidth}
+    \subfigure[演员柯]{
+        \begin{minipage}[t]{0.3\linewidth}
             \centering
-            \includegraphics[width=\linewidth]{figure/2dpose/233_4_0} %
+            \includegraphics[width=\linewidth]{figure/2dpose/ke_op} %
         \end{minipage}% 
     }%  
-    \subfigure[演员2相机14]{
-        \begin{minipage}[t]{0.23\linewidth}
-            \centering
-            \includegraphics[width=\linewidth]{figure/2dpose/233_14_0} %
-        \end{minipage}% 
-    }%   
-    \caption{人体二维检测框架在LightStage数据上的应用结果\label{fig:ls2d}}
+    \caption{人体二维检测框架OpenPose在LightStage数据上的应用结果\label{fig:ls2dop}}
 \end{figure}
-
+\unsure{}{感觉需要一下将图片做个直方图矫正}
+从可视化的结果(图\ref{fig:ls2d},图\ref{fig:ls2dop})中我们可以看到，基于深度学习的方法能够在我们的场景中容易地检测出人体的各个关节的位置，我们的演员的服装、动作均可以不受实验环境的限制，可以较为自由地实现各种动作，并且二维检测方法还能检测出这些动作下的关键点位置。同时，由于我们的视频采集得到的是分辨率为\(2048\times 2048\)的高清照片，因此即使在这种有一定距离的场景下，依然能保持脸部的清晰度，也能够实现对人体面部关键点、手部关键点的较为准确的检测。
 
 \subsection{本章小结}
+在本章中，我们对三种基于深度学习的人体二维关键点检测方法进行了学习，实现了在我们的数据上对人体二维关键点的检测功能。为了对二维关键点检测进行比较，我们选择了与我们的实验场景类似的人体大型开源数据集Human3.6M，并在该数据集上进行了定量的实验与误差分析，得到了AlphaPose精度更高的结论，为后续的工作提供了第一步的结果。这一部分存在的问题是，基于深度学习的方法在进行人体二维关键点检测时会出现检测错误的情况，因此我们在接下来的工作中会继续探究这一问题。
