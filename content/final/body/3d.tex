@@ -6,7 +6,7 @@
 \subsection{问题描述}
 三维人体姿态估计问题，即是说给定输入的人体图片或视频序列，从中得到人体的三维关节点的位置。从上一节中我们已经得到了人体的二维关节点位置，因此对于这一部分我们需要得到相应的人体三维姿态的估计。但是在只有单个视角的情况下，三维估计具有尺度和深度的不确定性。在只有一个相机的情况下，通常使用各种先验信息来减少这种不确定性，在我们的实验场景下，我们可以利用多个相机的空间信息，来优化求解人体的三维关节点的坐标。
 
-\subsection{模型概述}
+\subsection{相机标定}
 \subsubsection{相机模型}
 % https://www.cnblogs.com/wangguchangqing/p/8126333.html#autoid-0-4-0
 相机进行图像拍摄的过程涉及到了多个坐标系的转换，即先从世界坐标系进行刚性变换，转换到相机坐标系，从相机坐标系进行投影变换，转换到图像坐标系，最后根据相机参数，转换到像素坐标系上，像素坐标系就是我们一般意义上所指的图像。几个坐标系的简介如下：
@@ -91,7 +91,7 @@
 \end{equation}
 因此在使用相机前，需要先对相机的内部参数进行求解，求解该内部参数的过程即为标定。在标定的过程中即需要求解相机的内部参数与外部参数。接下来将介绍LightStage系统的标定过程。
 
-\subsubsection{相机标定}
+\subsubsection{标定原理}
 % https://www.cnblogs.com/wangguchangqing/p/8335131.html
 
 目前主流的相机标定方法是微软研究院的张正友教授与1998年提出的一种利用单个棋盘格平面进行相机标定的方法，该方法介于传统标定法和自标定法之间，标定效果较好，并且计算复杂度低。同时不需要高精度的标定物，便于操作。因此我们使用该方法进行相机的标定。
@@ -185,28 +185,61 @@
     \left[ \begin{array}{c} v^T_{12} \\ (v_{11}-v_{22})^T \end{array} \right]b=0
 \end{equation}
 因此，基于上式，通过至少三张包含棋盘格的图像，就可以解得矩阵\(B\)，再使用Cholesky分解法，就可以得到相机的内部参数矩阵\(K\)。
-
-
-当所有相机的内部参数确定之后，就需要确定所有相机的外部参数。最开始采用的方法是，对于相邻的两个相机，我们采集一组在这两个相机视角下都可见的棋盘格照片，标定相邻两个相机的相对变换矩阵，接着依次将所有的相机都标定，但是这样标定的过程中，相邻两个相机的标定误差会不断传递，因此整体的标定效果较差。因此，为了避免累积误差的出现，我们直接对所有相机的外参同时进行计算。
-
 \begin{figure}[htbp]
     \centering
     \subfigure[同一相机多个姿势的标定板]{
-        \begin{minipage}[t]{0.49\linewidth}
+        \begin{minipage}[t]{0.45\linewidth}
             \centering
-            \includegraphics[width=0.9\linewidth]{figure/calibrate/single_c} %
+            \includegraphics[width=\linewidth]{figure/calibrate/single_c} %
         \end{minipage}% 
     }% 
     \subfigure[标定板角点检测结果]{
-        \begin{minipage}[t]{0.49\linewidth}
+        \begin{minipage}[t]{0.45\linewidth}
             \centering
-            \includegraphics[width=0.9\linewidth]{figure/calibrate/single_cp} %
+            \includegraphics[width=\linewidth]{figure/calibrate/single_cp} %
         \end{minipage}% 
     }%
     \caption{单个相机的标定示意\label{fig:calsingle}}
 \end{figure}
 
-\unsure{}{标定板参数介绍}
+当所有相机的内部参数确定之后，就需要确定所有相机的外部参数。最开始采用的方法是，对于相邻的两个相机，我们采集一组在这两个相机视角下都可见的棋盘格照片，标定相邻两个相机的相对变换矩阵，接着依次将所有的相机都标定，但是这样标定的过程中，相邻两个相机的标定误差会不断传递，因此整体的标定效果较差。因此，为了避免累积误差的出现，我们直接对所有相机的外参同时进行计算。
+\begin{figure}[htbp]
+    \centering
+    \subfigure[相机视角1]{
+        \begin{minipage}[t]{0.45\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{figure/calibrate/all1} %
+        \end{minipage}% 
+    }% 
+    \subfigure[相机视角2]{
+        \begin{minipage}[t]{0.45\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{figure/calibrate/all3} %
+        \end{minipage}% 
+    }%
+    \subfigure[相机视角3]{
+        \begin{minipage}[t]{0.45\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{figure/calibrate/all4} %
+        \end{minipage}% 
+    }%
+    \caption{所有相机标定示意\label{fig:calall}}
+\end{figure}
+由之前的推导，在所有相机一起标定外参的时候，同样求解上述方程，再代入解出所有相机的外参。
+\begin{align}
+    \lambda = \frac{1}{s}=\frac{1}{\|A^{-1}h_1\|}=\frac{1}{\|A^{-1}h_2\|} \\
+    r_1=\frac{1}{\lambda}K^{-1}h_1   \\
+    r_2=\frac{1}{\lambda}K^{-1}h_2   \\
+    r_3 = r_1 \times r_2 \\
+    t=\lambda K^{-1}h_3
+\end{align}
+\unsure{}{这里需要抄一下PnP的原理}
+
+\subsubsection{标定实现}
+
+\unsure{}{标定板参数介绍，内参标定误差分析，外参标定误差。外参标定的结果可视化}
+
+\subsection{三维重建}
 
 \subsubsection{三角法}
 % https://scm_mos.gitlab.io/2018/12/08/triangulate/
@@ -351,6 +384,7 @@
         \end{tabular}
     \caption{优化法重建各关节误差（单位：mm）均值39.1,26.8\label{tab:3derroropt}}
 \end{table} 
+
 \subsection{量化分析}
 \unsure{}{把在CMU上测的拿来写一下}
 
