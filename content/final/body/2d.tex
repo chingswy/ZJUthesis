@@ -111,20 +111,20 @@ AlphaPose\cite{AlphaPose}是上海交通大学卢策吾教授团队开源的二�
     \centering
     \begin{tabular}{lcccccc}
         \hline
-         名称      & 左臀     & 左膝    & 左踝     & 右臀     & 右膝    & 右踝     \\
+        名称      & 左臀     & 左膝    & 左踝     & 右臀     & 右膝    & 右踝     \\
         \hline
-         OpenPose  & 11.5±6.0 & 8.8±6.4 & 15.9±7.6 & 15.9±5.0 & 8.0±7.4 & 11.1±9.8 \\
-         CPN       & 11.4±5.9 & 7.7±5.5 & 14.0±7.8 & 16.2±5.1 & 6.9±6.6 & 9.8±8.2  \\
-         AlphaPose & 12.2±5.2 & 7.8±4.3 & 13.6±5.7 & 17.2±5.2 & 6.7±5.0 & 9.6±5.6  \\
+        OpenPose  & 11.5,6.0 & 8.8,6.4 & 15.9,7.6 & 15.9,5.0 & 8.0,7.4 & 11.1,9.8 \\
+        CPN       & 11.4,5.9 & 7.7,5.5 & 14.0,7.8 & 16.2,5.1 & 6.9,6.6 & 9.8,8.2  \\
+        AlphaPose & 12.2,5.2 & 7.8,4.3 & 13.6,5.7 & 17.2,5.2 & 6.7,5.0 & 9.6,5.6  \\
         \hline
-         名称      & 左肩     & 左肘    & 左腕     & 右肩     & 右肘    & 右腕     \\
+        名称      & 左肩     & 左肘    & 左腕     & 右肩     & 右肘    & 右腕     \\
         \hline
-         OpenPose  & 7.5±4.7  & 8.0±5.4 & 5.9±6.6  & 9.0±6.4  & 7.3±5.0 & 6.5±6.0  \\
-         CPN       & 7.1±4.2  & 7.2±7.4 & 7.1±15.6 & 8.5±5.9  & 7.0±7.8 & 8.9±14.3 \\
-         AlphaPose & 6.8±4.3  & 6.7±4.4 & 5.1±3.3  & 7.9±5.4  & 6.0±3.8 & 5.8±3.6  \\
+        OpenPose  & 7.5,4.7  & 8.0,5.4 & 5.9,6.6  & 9.0,6.4  & 7.3,5.0 & 6.5,6.0  \\
+        CPN       & 7.1,4.2  & 7.2,7.4 & 7.1,15.6 & 8.5,5.9  & 7.0,7.8 & 8.9,14.3 \\
+        AlphaPose & 6.8,4.3  & 6.7,4.4 & 5.1,3.3  & 7.9,5.4  & 6.0,3.8 & 5.8,3.6  \\
         \hline
         \end{tabular}
-    \caption{三种二维检测人体方法的各关节误差（单位：像素）\label{tab:2derrorjoint}}
+    \caption{三种二维检测人体方法的各关节误差均值,方差（单位：像素）\label{tab:2derrorjoint}}
 \end{table}
 
 
@@ -146,19 +146,19 @@ AlphaPose\cite{AlphaPose}是上海交通大学卢策吾教授团队开源的二�
     \subfigure[演员冯]{
         \begin{minipage}[t]{0.3\linewidth}
             \centering
-            \includegraphics[width=\linewidth]{figure/2dpose/feng_ap} %
+            \includegraphics[width=\linewidth]{figure/result/alphapose/vis/feng} %
         \end{minipage}% 
     }% 
     \subfigure[演员帅]{
         \begin{minipage}[t]{0.3\linewidth}
             \centering
-            \includegraphics[width=\linewidth]{figure/2dpose/shuai_ap} %
+            \includegraphics[width=\linewidth]{figure/result/alphapose/vis/shuai} %
         \end{minipage}% 
     }%
     \subfigure[演员柯]{
         \begin{minipage}[t]{0.3\linewidth}
             \centering
-            \includegraphics[width=\linewidth]{figure/2dpose/ke_ap} %
+            \includegraphics[width=\linewidth]{figure/result/alphapose/vis/ke} %
         \end{minipage}% 
     }%  
     \caption{人体二维检测框架AlphaPose在LightStage数据上的应用结果\label{fig:ls2d}}
@@ -171,24 +171,24 @@ AlphaPose\cite{AlphaPose}是上海交通大学卢策吾教授团队开源的二�
     \subfigure[演员冯]{
         \begin{minipage}[t]{0.3\linewidth}
             \centering
-            \includegraphics[width=\linewidth]{figure/2dpose/feng_op} %
+            \includegraphics[width=\linewidth]{figure/result/openpose/feng_rendered} %
         \end{minipage}% 
     }% 
     \subfigure[演员帅]{
         \begin{minipage}[t]{0.3\linewidth}
             \centering
-            \includegraphics[width=\linewidth]{figure/2dpose/shuai_op} %
+            \includegraphics[width=\linewidth]{figure/result/openpose/shuai_rendered} %
         \end{minipage}% 
     }%
     \subfigure[演员柯]{
         \begin{minipage}[t]{0.3\linewidth}
             \centering
-            \includegraphics[width=\linewidth]{figure/2dpose/ke_op} %
+            \includegraphics[width=\linewidth]{figure/result/openpose/ke_rendered} %
         \end{minipage}% 
     }%  
     \caption{人体二维检测框架OpenPose在LightStage数据上的应用结果\label{fig:ls2dop}}
 \end{figure}
-\unsure{}{感觉需要一下将图片做个直方图矫正}
+% \unsure{}{感觉需要一下将图片做个直方图矫正}
 从可视化的结果(图\ref{fig:ls2d},图\ref{fig:ls2dop})中我们可以看到，基于深度学习的方法能够在我们的场景中容易地检测出人体的各个关节的位置，我们的演员的服装、动作均可以不受实验环境的限制，可以较为自由地实现各种动作，并且二维检测方法还能检测出这些动作下的关键点位置。同时，由于我们的视频采集得到的是分辨率为\(2048\times 2048\)的高清照片，因此即使在这种有一定距离的场景下，依然能保持脸部的清晰度，也能够实现对人体面部关键点、手部关键点的较为准确的检测。
 
 \subsection{本章小结}
