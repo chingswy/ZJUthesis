@@ -35,6 +35,11 @@ Gong等人\cite{cihppgn}提出了一种不需要检测的部件分组网络(Dete
     IoU = \frac{S_a \cap S_b}{S_a \cup S_b} = \frac{S_a \cdot S_b}{S_a + S_b - \cdot S_a\cdot S_b}
 \end{equation}
 
+为了使我们的模型更加贴合实际的人体轮廓，如果只使用参数化模型会无法拟合到各个轮廓上，因此我们对之前的人体三维网格模型进行修改，对于模型上的每一个顶点，我们都给其加上一个小的偏移量\(d_i\)，通过这个偏移量去控制人体模型，使其更加接近实际轮廓。同样我们通过定义损失函数，然后再去最小化这个损失函数的方法，损失函数也由不同的项组成。首先是模型拟合项
+\begin{equation}
+    L_{silh} = || S_{real} - \Pi(V(\theta, \beta, D)) ||_2
+\end{equation}
+
 
 \begin{figure}[htbp]
     \centering
