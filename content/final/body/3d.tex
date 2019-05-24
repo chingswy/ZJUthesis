@@ -94,13 +94,10 @@
 \subsubsection{标定原理}
 % https://www.cnblogs.com/wangguchangqing/p/8335131.html
 
-目前主流的相机标定方法是微软研究院的张正友教授与1998年提出的一种利用单个棋盘格平面进行相机标定的方法，该方法介于传统标定法和自标定法之间，标定效果较好，并且计算复杂度低。同时不需要高精度的标定物，便于操作。因此我们使用该方法进行相机的标定。
-
-
+目前主流的相机标定方法是微软研究院的张正友教授与1998年提出的一种利用单个棋盘格平面进行相机标定的方法\cite{zhangzhengyou}，该方法介于传统标定法和自标定法之间，标定效果较好，并且计算复杂度低。同时不需要高精度的标定物，便于操作。因此我们使用该方法进行相机的标定。
 
 % \comment{这里写相机标定的内容}
 假设三维世界坐标系中的点的\qczb 为\(X = [x,y,z,1]^T\)，其在二维相机平面上的\qczb 为\(m = [u,v,1]^T\)。那么由相机模型的定义我们可以知道：
-
 \begin{equation}
     Z \bm{m} = K(R\bm{X} + T)
 \end{equation}
@@ -190,41 +187,39 @@
             \includegraphics[width=\linewidth]{figure/calibrate/single_cp} %
         \end{minipage}% 
     }%
-    \caption{单个相机的标定示意\label{fig:calsingle}}
+    \caption{单个相机的内参标定示意\label{fig:calsingle}}
 \end{figure}
 
 当所有相机的内部参数确定之后，就需要确定所有相机的外部参数。最开始采用的方法是，对于相邻的两个相机，我们采集一组在这两个相机视角下都可见的棋盘格照片，标定相邻两个相机的相对变换矩阵，接着依次将所有的相机都标定，但是这样标定的过程中，相邻两个相机的标定误差会不断传递，因此整体的标定效果较差。因此，为了避免累积误差的出现，我们直接对所有相机的外参同时进行计算。
 \begin{figure}[htbp]
     \centering
     \subfigure[相机视角1]{
-        \begin{minipage}[t]{0.45\linewidth}
+        \begin{minipage}[t]{0.3\linewidth}
             \centering
             \includegraphics[width=\linewidth]{figure/calibrate/all1} %
         \end{minipage}% 
     }% 
     \subfigure[相机视角2]{
-        \begin{minipage}[t]{0.45\linewidth}
+        \begin{minipage}[t]{0.3\linewidth}
             \centering
             \includegraphics[width=\linewidth]{figure/calibrate/all3} %
         \end{minipage}% 
     }%
     \subfigure[相机视角3]{
-        \begin{minipage}[t]{0.45\linewidth}
+        \begin{minipage}[t]{0.3\linewidth}
             \centering
             \includegraphics[width=\linewidth]{figure/calibrate/all4} %
         \end{minipage}% 
     }%
-    \caption{所有相机标定示意\label{fig:calall}}
+    \caption{所有相机外参标定示意\label{fig:calall}}
 \end{figure}
-
-
-\unsure{}{这里需要抄一下PnP的原理}
-在解出所有相机的内部参数之后，我们需要对所有的相机的外部参数进行求解，即求解相机的相对于世界坐标系的旋转矩阵\(R\)，以及相对于世界坐标系的平移\(T\)。这个问题本质上是一个PnP问题，即已知了\(n\)个三维空间点的坐标以及二维投影的位置的时候，如何去估计相机的位姿。
+% \unsure{}{这里需要抄一下PnP的原理}
+在解出所有相机的内部参数之后，我们需要对所有的相机的外部参数进行求解，即求解相机的相对于世界坐标系的旋转矩阵\(R\)，以及相对于世界坐标系的平移\(T\)。这个问题本质上是一个PnP问题，即已知了\(n\)个三维空间点的坐标以及二维投影的位置的时候，如何去估计相机的位姿。通常在多于三个点时，该问题是一个超定的问题，我们需要通过最小化三维点到二维上的投影误差来求解相机的位姿。
 
 \subsubsection{标定实现}
 由于LightStage系统的相机较多，与单个相机的标定方法有所区别，因此我们的标定主要分为以下步骤：
 \begin{description}
-    \item[棋盘格制作：]一般的简单的相机标定使用的通常是打印在A4纸上的棋盘格，但是我们的使用场景较大，因此A4纸大小的棋盘格太小了，我们制作了一个较大的棋盘格，棋盘格的每一个格子的边长为10cm，我们使用的是有\(10\times 6\)的棋盘格，即其内部会有\(9\times 6\)个网格点。
+    \item[棋盘格制作：]一般的简单的相机标定使用的通常是打印在A4纸上的棋盘格，但是我们的使用场景较大，因此A4纸大小的棋盘格太小了，我们制作了一个较大的棋盘格，棋盘格的每一个格子的边长为100mm，我们使用的是有\(10\times 7\)个格子的棋盘格，即其内部会有\(9\times 6\)个网格点。
     \item[标定单个相机：]在这一步中，我们对于每一个相机，录制一段拿着棋盘格的在相机的不同位置，以及棋盘格自身是不同姿态的视频，使用录制的视频进行棋盘格角点检测，进行一次标定操作，得到所有的单个相机的内部参数
     \item[标定所有相机外参：]在这一步中，我们将棋盘格静止放置在系统的中间的位置，保证所有相机都能看到棋盘格，使用所有相机同时录制。得到所有视角下的棋盘格的照片后，对其角点位置进行检测，接着使用解PnP问题求解出所有相机的外部参数。
 \end{description}
@@ -233,17 +228,31 @@
 \begin{description}
     \item[角点检测：]使用OpenCV的\textrm{findChessboardCorners}函数进行角点检测，该函数的输入是需要寻找角点的图片，该棋盘格的样式，该函数将会返回按顺序存储的棋盘格角点的图片中的坐标，这里的顺序是按照棋盘格的顺序生成的。
     \item[棋盘格三维坐标计算：]在进行相机标定时，我们需要预先计算棋盘格的在空间中的三维坐标，由之前的推导，我们在进行相机标定的时候都是假设棋盘格所在的平面为\(z=0\)平面，因此这一步需要根据棋盘格的实际物理尺寸，依次给棋盘格上的每个点按顺序计算其坐标。
-    \item[内参标定：]这一步使用的是OpenCV的\textrm{calibrateCamera}函数，该函数的输入是我们预先计算的棋盘格的在三维空间中的坐标，以及角点检测得到的在图片中的像素坐标，该函数将返回相机的内部参数矩阵，相机的畸变系数，以及对应的每一张图片的外部参数。
-    \item[外参计算：]这一步将会读入之前的内部参数的计算结果，同样使用OpenCV的\textrm{findChessboardCorners}函数，对输入的同一时刻的所有相机的图片进行角点检测，通过使用OpenCV的\textrm{solvePnP}函数求解所有相机的外部参数。该函数的输入参数为棋盘格在空间中的三维坐标，棋盘格在图片中的坐标，相机的内部参数。该函数将返回相机的外部参数\(r, t\)。
+    \item[内参标定：]这一步使用的是OpenCV的\textrm{calibrateCamera}函数，该函数的输入是我们预先计算的棋盘格的在三维空间中的坐标，以及角点检测得到的在图片中的像素坐标，该函数将返回相机的内部参数矩阵，相机的畸变系数，以及对应的每一张图片的外部参数。标定结果如图\ref{fig:calb}\ref{fig:calsin}所示，图中将我们在标定时使用到的棋盘格计算出来的位置画出。对于每一个相机，我们都使用了100张以上的不同位置的棋盘来进行计算。
+    \begin{figure}[ht] \centering
+        \subfigure[\label{fig:calsin} 单个相机标定结果，棋盘格位置示意] {
+            \includegraphics[width=0.48\linewidth]{figure/calibrate/camsingle}
+        }
+        \subfigure[\label{fig:calall} 所有相机外参标定结果] {
+            \includegraphics[width=0.48\linewidth]{figure/calibrate/cameraall}
+        }
+        \caption{\label{fig:calb} 相机标定}
+    \end{figure} 
+    \item[外参计算：]这一步将会读入之前的内部参数的计算结果，同样使用OpenCV的\textrm{findChessboardCorners}函数，对输入的同一时刻的所有相机的图片进行角点检测，通过使用OpenCV的\textrm{solvePnP}函数求解所有相机的外部参数。该函数的输入参数为棋盘格在空间中的三维坐标，棋盘格在图片中的坐标，相机的内部参数。该函数将返回相机的外部参数\(r, t\)。这一步的结果如图\ref{fig:calb}\ref{fig:calall}所示，其中的中心的棋盘格表示我们在标定外参时其在世界坐标系中的位置，环绕一圈的是标定的所有相机在世界坐标系中的位置。
 \end{description}
 
 % \unsure{}{标定板参数介绍，内参标定误差分析，外参标定误差。外参标定的结果可视化}
-\unsure{}{这里差一个所有相机的标定结果的可视化分析}
+% \unsure{}{这里差一个所有相机的标定结果的可视化分析}
 \subsubsection{误差分析}
 为了检测相机标定的质量，我们需要对该过程进行误差分析，由于对于单个相机的标定与对所有相机的标定过程是分开的，因此我们分别对这两部分进行误差分析。计算误差的方式重投影误差，即为根据重建出来的参数，将三维空间中的棋盘格投影到图像平面上，计算投影之后的点与实际检测出来的角点之间的欧氏距离。
 
-对于单个相机的情况，我们分别统计了对于每个相机，其在所有使用到的棋盘格照片的重投影误差，如图\ref{fig:cal-one}所示。从图中可以看出，对于单个相机的标定，其误差能够控制在 个像素范围内，表明对单个相机的参数标定基本准确。对于所有相机的外参的标定，我们使用同一个时刻的静止的棋盘格，将其投影到各个相机视角下，计算其各自的重投影误差，如图\ref{fig:cal-all}所示。从图中可以看出，在使用该方法计算外参时，重投影误差也较低，说明我们的标定方法可靠，可以作为下一步计算的参数。
-
+对于单个相机的情况，我们分别统计了对于每个相机，其在所有使用到的棋盘格照片的重投影误差，如图\ref{fig:cal-all}所示。从图中可以看出，对于单个相机的标定，其误差能够控制在 个像素范围内，表明对单个相机的参数标定基本准确。对于所有相机的外参的标定，我们使用同一个时刻的静止的棋盘格，将其投影到各个相机视角下，计算其各自的重投影误差，如图\ref{fig:cal-all}所示。内参标定的平均误差为0.26像素，外参标定的平均重投影误差为0.34像素。从图中可以看出，在使用该方法计算外参时，重投影误差也较低，说明我们的标定方法可靠，可以作为下一步计算的参数。
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.5\linewidth]{figure/calibrate/camera}
+    \caption{\label{fig:cal-all} 相机标定重投影误差}
+\end{figure}  
+% 0.26780743478260877 0.34125102
 \subsection{三维重建}
 
 \subsubsection{三角法}
@@ -286,10 +295,8 @@
 \begin{equation}
     AX = \bm{0}
 \end{equation}
-因此我们采用SVD分解的方法，计算$A$矩阵奇异值最小的对应的奇异向量，就是三维坐标的解。那么我们的问题即为假定未知的所有的关节的三维点的坐标为$S\in \mathbb{R}^{3\times N}$，$N$为关节点的数目，第$i$ 个相机的参数为$R_i,T_i,K_i$。那么该问题的方程可写为：
-
-\unsure{}{这里需要补充一下SVD解方程的解法}
-
+如果直接求解该方程，很容易得到一个零解，但是该零解并不是我们想要的三维坐标，因此我们需要对解增加约束，一般增加的约束为\(|| X || = 1\)，而对于齐次坐标表示的\(X\)，在计算得解后，我们将其第四个维度归一化为１，即可得到实际需要的坐标值。因此我们采用SVD分解的方法，计算$A$矩阵奇异值最小的对应的奇异向量，就是三维坐标的解。那么我们的问题即为假定未知的所有的关节的三维点的坐标为$S\in \mathbb{R}^{3\times N}$，$N$为关节点的数目，第$i$ 个相机的参数为$R_i,T_i,K_i$。那么该问题的方程可写为：
+% \unsure{}{这里需要补充一下SVD解方程的解法}
 \begin{equation}
     \left[ \begin{array}{c}
             x_{n0}P_{03} - P_{01} \\
@@ -309,6 +316,7 @@
 对于所有关节点，求解方程即可获得所有关节点的三维空间坐标。
 
 为了对该方法进行量化，同样我们在Human3.6M数据集上进行测试，该数据集包含了四个相机的视角，数量小于LightStage数据集的相机数目，我们使用全部视角下的二维检测结果，以及给定的相机参数进行重建。通常对于三维关节点估计的评价指标是平均关节位置误差(Mean Per Joint Position Error，简称MPJPE)，即估计的关节坐标与真实的关节坐标之间的欧氏距离的平均值。此外，由于采集数据的运动捕捉系统本身也会带来一些噪声，因此除了平均关节位置误差外，研究中通常使用的指标还有正确关节点百分比(Percentage of Correct Key-points，简称PCK)，该指标描述的是估计的关节坐标与真实的关节坐标之间的欧式距离小于给定阈值的百分比。通常该阈值指定为150mm。
+
 使用平均关节位置误差以及正确关节点百分比两个指标，将我们的算法在Human3.6M数据集上进行测试，可以得到在测试数据上的平均关节位置误差为45.9mm，正确关节点百分比为99.8\%，其各个关节的详细的平均位置误差如表\ref{tab:3derrorjoint}所示，各个关节的正确关节点百分比如表\ref{tab:3dpck}所示。从两个表中可以看出，对于大部分的检测结果，均在150mm的范围内，而少部分错误检测的结果会使得误差的均值和方差都增大。从表格中可以看出，越远离躯干的部位，其正确关节点百分比越低，通过对误差较大的情况进行可视化发现，错误的主要原因是在出现了自遮挡的时候，左手腕和右手腕互相检测错误，导致误差增大。因此我们需要想办法解决该问题。
 
 \begin{table}[H]
@@ -317,9 +325,9 @@
         \hline
                      & 左臀  & 左膝  & 左踝  & 右臀  & 右膝  & 右踝  \\
         \hline
-        关节误差(mm) & 59±17 & 46±18 & 77±17 & 77±12 & 40±22 & 63±29 \\
+        关节误差(mm) & 59, 17 & 46, 18 & 77, 17 & 77, 12 & 40, 22 & 63, 29 \\
                      & 左肩  & 左肘  & 左腕  & 右肩  & 右肘  & 右腕  \\
-        关节误差(mm) & 29±20 & 35±15 & 25±14 & 36±22 & 33±14 & 31±62 \\
+        关节误差(mm) & 29, 20 & 35, 15 & 25, 14 & 36, 22 & 33, 14 & 31, 62 \\
         \hline
     \end{tabular}
     \caption{三角法重建各关节误差（单位：mm）\label{tab:3derrorjoint}}
@@ -339,6 +347,37 @@
     \caption{三角法正确关节点百分比\label{tab:3dpck}}
 \end{table}
 
+由于Human3.6M数据集只有四个视角可用，而我们的数据有23个视角可以使用，因此只在Human3.6M数据集上进行测试无法较好的体现我们的多视角的优势，因此我们再使用了同样的多视角的Panoptic的数据集，Panoptic数据集总共有480个普通相机，我们均匀选择其中的24个相机，使其能够刚好环绕场景一圈，同样使用之前的方法，我们选择了其中的一个单人的动作数据，选择了3000帧的数据，即总共图片有\(3000\times 24 = 72000\)张。对其进行重建，使用相同的指标进行量化，结果如表所示。
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{lllllll}
+        \hline
+                     & 左臀   & 左膝   & 左踝   & 右臀   & 右膝   & 右踝   \\
+        \hline
+        关节误差(mm) & 24, 48 & 37, 29 & 31, 85 & 27, 59 & 35, 35 & 33, 37 \\
+                     & 左肩   & 左肘   & 左腕   & 右肩   & 右肘   & 右腕   \\
+        关节误差(mm) & 14, 8  & 30, 12 & 38, 16 & 15, 7  & 25, 11 & 31, 15 \\
+        \hline
+    \end{tabular}
+    \caption{Panoptic三角法重建平均关节误差（单位：mm）均值28.4, 38.7\label{tab:3derrorcmu}}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{lllllll}
+        \hline
+             & 左臀    & 左膝    & 左踝    & 右臀    & 右膝    & 右踝    \\
+        \hline
+         PCK & 99.64\%  & 99.61\%  & 98.29\%  & 99.46\%  & 99.46\%  & 98.96\%  \\
+             & 左肩    & 左肘    & 左腕    & 右肩    & 右肘    & 右腕    \\
+         PCK & 100.00\% & 100.00\% & 100.00\% & 100.00\% & 100.00\% & 100.00\% \\
+        \hline
+        \end{tabular}
+    \caption{Panoptic数据集三角法正确关节点百分比\label{tab:3dpckcmu}}
+\end{table}
+
+\subsection{模型应用}
 
 \subsubsection{优化法}
 由于在实际情况中，我们得到的二维关节点不一定在每个相机下都可见，因此我们需要通过一个权值来控制该关节点在一个相机视角下的可见性。同时，由于深度神经网络的输出带有不确定性，其对每个关节的检测结果均会有一个置信度的指标，置信度大即表示深度神经网络模型认为该点为对应关节的概率大，反之置信度小则表示该点是该关节的不确定性较大。那么我们在恢复人体的三维关节坐标时即可将该权重纳入考虑范围内，即更加相信那些置信度高的视角下的检测结果，通过这种方法来使我们的模型更加鲁棒。
@@ -357,7 +396,7 @@
 \end{equation}
 将投影坐标表达式代入，即得
 \begin{equation}
-    L_{repro} \sum^I_{i=1} \sum_{n=1}^N w_{in}||Z_i^{-1}K_i(R_iX_n + T_i) - \hat x_{in}||_2
+    L_{repro} = \sum^I_{i=1} \sum_{n=1}^N w_{in}||Z_i^{-1}K_i(R_iX_n + T_i) - \hat x_{in}||_2
 \end{equation}
 \newcommand{\mi}{第\(i\)个}
 \newcommand{\mn}{第\(n\)个}
@@ -369,7 +408,7 @@
 \end{equation}
 其中先验项表示关节\(a\)和关节\(b\)的结构依赖关系，这一项约束了两个关节点的骨架长度，其中，\(\left\| \boldsymbol {X} _ { a } - \boldsymbol {X} _ { b } \right\|\) 表示关节点\(\boldsymbol {X} _ { a }, \boldsymbol {X} _ { b } \)的欧几里得距离，\(\varepsilon\)表示人体的骨架结构中的边。在进行优化时一般的最大化似然函数\(p\)的方法是，先将状态空间离散化，成为一个三维空间的网格结构，接着使用最大积(max-product)算法\cite{max-product}。然而随着状态空间的维度的增加，最大积算法的计算复杂度增长得十分快，效率较低。因此我们没有采用对空间网格进行划分的办法，由于我们前一步已经通过三角法获得了关节的三维空间位置的值，我们直接将该值作为初值，最大化似然函数即可以转化为最小化似然函数的对数的负数，通过取对数能够将似然函数里的乘法转化为加法，将指数计算去掉，这样能够有效提高优化时的计算速度，因此关于骨架结构的损失函数即可以写为
 \begin{equation}
-    L_{s} = -\log p = \log (\sigma \sqrt{2\pi}) + \frac{(\left\| \boldsymbol {X} _ { a } - \boldsymbol {X} _ { b } \right\| - L_{ij})^2}{2\sigma^2}
+    L_{s} = -\log p = \sum_{ ( a,b ) \in \varepsilon }\left(\log (\sigma \sqrt{2\pi}) + \frac{(\left\| \boldsymbol {X} _ { a } - \boldsymbol {X} _ { b } \right\| - L_{ab})^2}{2\sigma_{ab}^2}\right)
 \end{equation}
 
 % \textbf{运动约束}：同样我们可以知道，人体的运动状态也是无法突变的，人的关节位置也是无法突变的，那么将其数学化表达，即是说我们希望相邻两帧的人的关节位置的差尽量小，通过这一项约束，我们可以限制前后帧之间的由于检测错误出现的突变，数学化表达式记为：
@@ -382,35 +421,37 @@
         \hline
                      & 左臀  & 左膝  & 左踝  & 右臀  & 右膝  & 右踝  \\
         \hline
-        关节误差(mm) & 39±16 & 44±16 & 68±16 & 43±16 & 41±19 & 66±26 \\
+        关节误差(mm) & 39, 16 & 44, 16 & 68, 16 & 43, 16 & 41, 19 & 66, 26 \\
+        \hline
                      & 左肩  & 左肘  & 左腕  & 右肩  & 右肘  & 右腕  \\
-        关节误差(mm) & 28±17 & 33±13 & 22±12 & 30±15 & 33±14 & 24±56 \\
+        关节误差(mm) & 28, 17 & 33, 13 & 22, 12 & 30, 15 & 33, 14 & 24, 56 \\
         \hline
     \end{tabular}
-    \caption{优化法重建各关节误差（单位：mm）均值39.1,26.8\label{tab:3derroropt}}
+    \caption{Human3.6M数据集优化法各关节误差（单位：mm）均值39.1,方差26.8\label{tab:3derroropt}}
 \end{table}
 
-\subsection{量化分析}
-% 这里还需要写一下重投影之后的误差是多少
-\unsure{}{把在CMU上测的拿来写一下}
+% \subsection{量化分析}
+% % 这里还需要写一下重投影之后的误差是多少
+% \unsure{}{把在CMU上测的拿来写一下}
 
-\begin{table}[H]
-    \centering
-    \begin{tabular}{lllllll}
-        \hline
-                     & 左臀   & 左膝   & 左踝   & 右臀   & 右膝   & 右踝   \\
-        \hline
-        关节误差(mm) & 24, 48 & 37, 29 & 31, 85 & 27, 59 & 35, 35 & 33, 37 \\
-                     & 左肩   & 左肘   & 左腕   & 右肩   & 右肘   & 右腕   \\
-        关节误差(mm) & 14, 8  & 30, 12 & 38, 16 & 15, 7  & 25, 11 & 31, 15 \\
-        \hline
-    \end{tabular}
-    \caption{CMU的结果（单位：mm）均值28.4, 38.7\label{tab:3derrorcmu}}
-\end{table}
 \subsection{模型应用}
 
 由上述分析，我们知道该方法是可靠的，因此我们可以对其在我们的数据上进行应用。我们的数据采集了三个演员的不同动作，并分别对三段动作都进行了重建，在重建的时候，我们使用OpenPose对人体的脸部关键点与手部关键点也进行了重建，从可视化的结果来看，该重建是有效的。
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.325\linewidth]{figure/result/images/feng2} \hfill
+    \includegraphics[height=0.325\linewidth]{figure/result/3d/feng1} \hfill
+    \includegraphics[height=0.325\linewidth]{figure/result/3d/feng2} \hfill
+    \includegraphics[height=0.325\linewidth]{figure/result/images/shuai2} \hfill
+    \includegraphics[height=0.325\linewidth]{figure/result/3d/shuai1} \hfill
+    \includegraphics[height=0.325\linewidth]{figure/result/3d/shuai2} \hfill
+    \includegraphics[height=0.325\linewidth]{figure/result/images/ke2} \hfill
+    \includegraphics[height=0.325\linewidth]{figure/result/3d/ke1} \hfill
+    \includegraphics[height=0.325\linewidth]{figure/result/3d/ke2} 
+    \caption{三维关键点重建结果，左列为原始图片，中间列为当前视角下的三维骨架，第三列为另一视角的三维骨架\label{fig:3djoint}}
+  \end{figure}
+
 由图中可以看出，我们的系统采集到的高清照片能够保留足够多的信息，使得能从中检测到相应的特征点，因此能够对人体的比较细小的关节点进行检测与重建，而这是传统的基于标记点的重建方法无法做到的。
 
-\unsure{}{把在LightStage上的测的结果多贴一点图}
+% \unsure{}{把在LightStage上的测的结果多贴一点图}

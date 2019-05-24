@@ -12,7 +12,6 @@ SMPL模型是一个高效的线性人体模型，模型总共定义了\(N = 6890
 \textbf{混合蒙皮(Blend skinning)：}这一步的目的是为了根据输入的姿态参数\(theta\)将人体的网格模型进行变形。人体的姿态参数的定义是，对于每个关节，使用轴角(axis-angle)来表示他的旋转。由于每一个旋转矩阵只有三个自由度，所以一般的表示方法都是使用参数化的表示。常用的参数化的方法是使用欧拉角，但是欧拉角会带来万向锁的问题，因为欧拉角表示并没有覆盖旋转矩阵空间内的所有区域。并且，欧拉角使用角度来进行表示，这样在进行优化的时候其值的范围是有周期性的，不连续，使得优化过程不自然，因此选择了使用轴角表示。
 
 对于我们的骨架模型，有\(K=23\)个关节表示旋转，加上人整体的旋转，姿势参数即为\(\theta = [\omega_0^T, \omega_1^T, \ldots, \omega_K^T]\)，其中的每一个\(\omega\)是一个三维的向量，\(\omega\)的模长\(||\omega||\)表示旋转的角度，\(\frac{\omega}{||\omega||}\)表示旋转的方向的单位向量。为了在计算的时候表示旋转，通常会需要先转换成旋转矩阵。旋转向量转化成旋转矩阵的方法是通过罗德里格斯公式(Rodrigues formula):
-
 \begin{equation}
     \exp \left(  \omega  _ { j } \right) = \mathcal { I } + \widehat { \overline { \omega }} _ { j } \sin \left( \left\|  \omega  _ { j } \right\| \right) + \widehat { \overline { \omega } } _ { j } ^ { 2 } \cos \left( \left\| \omega_ { j } \right\| \right)
 \end{equation}
@@ -50,7 +49,7 @@ SMPL模型是一个高效的线性人体模型，模型总共定义了\(N = 6890
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\linewidth]{figure/proposal/smpl}
+    \includegraphics[width=0.8\linewidth]{figure/proposal/smpl}
     \caption{\label{fig:smplsample} SMPL模型示例}
 \end{figure}
 
