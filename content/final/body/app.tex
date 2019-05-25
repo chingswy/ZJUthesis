@@ -1,31 +1,33 @@
+\newpage
 \section{人体三维重建工具}
 
 \subsection{总体框架}
-整合前面的所有二维关键点估计部分、三维关键点重建、人体几何模型重建部分，我们设计了一个多视角的单目视频人体重建工具。该工具的设计主要流程如下所示。
-\unsure{}{插个流程图}
+整合前面的所有二维关键点估计部分、三维关键点重建、人体几何模型重建部分，我们设计了一个多视角的单目视频人体重建工具。%该工具的设计主要流程如下所示。
+% \unsure{}{插个流程图}
 
 使用者只需要读入多个视角的图像或视频数据，以及摄像机的内部参数和外部参数，就可以对其中的人体动作进行捕捉，并且得到一个人体的三维模型，以及其动作。
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.5\linewidth]{figure/app/viscal}
-    \caption{\label{fig:appcal} 渲染离散化过程示意}
+    \includegraphics[width=0.8\linewidth]{figure/app/viscal}
+    \caption{\label{fig:appcal} 相机标定示意}
 \end{figure}
+图\ref{fig:appcal}显示了导入所有相机标定图的界面可视化。
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.5\linewidth]{figure/app/visvideo}
-    \caption{\label{fig:appvideo} 渲染离散化过程示意}
+    \includegraphics[width=0.8\linewidth]{figure/app/visvideo}
+    \caption{\label{fig:appvideo} 视频帧导入}
 \end{figure}
-
+图\ref{fig:appcal}显示了导入所有相机的录制的人的数据的可视化效果。在导入图片文件夹后，即可选择二维关节点检测方式，然后对二维关节点进行检测，并使用该工具进行可视化，如图\ref{fig:app2d}所示。
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.5\linewidth]{figure/app/vis2d}
-    \caption{\label{fig:app2d} 渲染离散化过程示意}
+    \includegraphics[width=0.8\linewidth]{figure/app/vis2d}
+    \caption{\label{fig:app2d} 二维关节点检测结果可视化}
 \end{figure}
  
 
 \subsection{界面设计}
-在界面设计的时候，我们主要秉承着简洁易用的原则，并且能够对我们的结果进行较好的可视化。我们设计的系统的用户交互界面设计如图 所示。该工具包含了人体三维重建的各个步骤，如相机标定、二维关键点估计、三维关键点重建、人体几何模型重建等。
+在界面设计的时候，我们主要秉承着简洁易用的原则，并且能够对我们的结果进行较好的可视化。我们设计的系统的用户交互界面设计如图 所示。该工具包含了人体三维重建的各个步骤，如相机标定、二维关键点估计、三维关键点重建、人体几何模型重建等。由于三维的可视化需要借助其他软件实现，因此没有将三维几何重建的可视化部分整合到该工具中。
 
 \subsection{使用说明}
 在使用时，用户需要依次选择功能。如果相机没有进行标定，需要先选择各个相机标定图片文件所在的文件夹，对其进行标定，得到相机标定的参数。如果相机已经标定，那么需要导入相机参数所在的路径。载入相机参数后，可以选择不同的二维关键点检测方式，进行检测，接着对结果进行可视化。完成二维关键点检测之后，即可运行三维关键点重建，同样提供了两种方式可以选择。最后获得三维关键点之后即可运行人体几何模型重建。

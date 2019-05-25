@@ -122,12 +122,47 @@ Gong等人\cite{cihppgn}提出了一种不需要检测的部件分组网络(Dete
 \subsection{动作迁移}
 在影视制作业中，通常会有这样的需求，即通过专业的动作演员生成一段特殊的动作，例如高难度的武打动作，然后将这段动作序列迁移到另一个演员模型上，或者迁移到一个动画模型上。在我们的算法中，由于使用了人体的几何模型，因此我们同样也可以完成这样的事情。其主要流程为：通过我们的动作捕捉系统获得演员的动作序列；通过其他方式获得演员的模型贴图，或者同样通过我们的系统获得演员的模型贴图；将动作序列与模型贴图进行组合，即可得到另一个演员的完成这个动作的图片或者视频了。
 
-例如针对我们获取的演员帅的动作数据，我们将重建获得的人体几何模型的姿态参数和形状参数以及在世界坐标系中的位置的数据保存下来。我们将其进行纹理贴图，纹理文件来源于 等人的论文所提供的纹理贴图\cite{surreal}。为了体现模型的通用性，我们选择了两个不同形变的模型及其纹理，渲染得到模型图。
+例如针对我们获取的演员帅的动作数据，我们将重建获得的人体几何模型的姿态参数和形状参数以及在世界坐标系中的位置的数据保存下来。我们将其进行纹理贴图，纹理文件来源于Varol等人的论文所提供的纹理贴图\cite{surreal}。为了体现模型的通用性，我们选择了两个不同外表的模型及其纹理，渲染得到模型图。如图\ref{fig:motrans}所示。
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.325\linewidth]{{figure/result/mask/feng2_rgb.png}} \hfill
+    \includegraphics[height=0.325\linewidth]{{figure/result/texture/00000015_male}} \hfill
+    \includegraphics[height=0.325\linewidth]{{figure/result/texture/00000015_f}} \hfill
+    \includegraphics[height=0.325\linewidth]{{figure/result/mask/shuai2_rgb.png}} \hfill
+    \includegraphics[height=0.325\linewidth]{{figure/result/texture/00000990_male}} \hfill
+    \includegraphics[height=0.325\linewidth]{{figure/result/texture/00000990_f}} \hfill
+    \includegraphics[height=0.325\linewidth]{{figure/result/mask/ke2_rgb.png}} \hfill
+    \includegraphics[height=0.325\linewidth]{{figure/result/texture/00001604_male}} \hfill
+    \includegraphics[height=0.325\linewidth]{{figure/result/texture/00001604_f}}
+    \caption{动作迁移结果，左列为原始图片，中间列与右列分别为两个不同的人体模型\label{fig:motrans}}
+\end{figure} 
 
-\unsure{}{这里写如何把别人的纹理贴过来}
+% \unsure{}{这里写如何把别人的纹理贴过来}
 
-\unsure{}{这里写如何贴纹理}
+% \unsure{}{这里写如何贴纹理}
 \subsection{模型迁移}
-同样，我们得到了一个演员的纹理之后，可以将其贴到其他演员的动作模型上。如图，我们将重建得到的演员帅的贴图，与同样通过重建得到的演员柯的模型、重建得到的演员冯的模型进行结合，我们同样选择之前相同的帧，将其渲染出来，如图所示。
+同样，我们得到了一个演员的纹理之后，可以将其贴到其他演员的动作模型上。如图，我们将重建得到的演员帅的贴图，贴图如图\ref{fig:texture}所示，与同样通过重建得到的演员柯的模型、重建得到的演员冯的模型进行结合，我们同样选择之前相同的帧，将其渲染出来，如图\ref{fig:texture}所示。
 
-\unsure{}{这里把帅的贴到其他两个人的模型上}
+\begin{figure}[htbp]
+    \centering
+    \subfigure[帅的纹理贴图]{
+        \begin{minipage}[t]{0.325\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{figure/result/texture/shuai} %
+        \end{minipage}% 
+    }% 
+    \subfigure[帅的贴图迁移到冯上]{
+        \begin{minipage}[t]{0.325\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{figure/result/texture/feng} %
+        \end{minipage}% 
+    }%
+    \subfigure[帅的贴图迁移到柯上]{
+        \begin{minipage}[t]{0.325\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{figure/result/texture/ke} %
+        \end{minipage}% 
+    }%
+    \caption{纹理迁移示意\label{fig:texture}}
+\end{figure}
+% \unsure{}{这里把帅的贴到其他两个人的模型上}
