@@ -76,12 +76,16 @@
 
 目前该数据集开源了65个视频序列，总共5.5小时，其中包含了150万的人体骨架数据。可以使用的数据有通过480个相机恢复出来的人体骨架数据、人体脸部关键点的三维数据、人体手部关键点的数据。该系统在进行所有的521个相机的标定的时候，采用的方法是运动恢复结构（Structure from Motion）的方法。该方法的主要流程是通过检测场景中的特征点，对不同视角下的特征点进行匹配，然后估计出各个相机的位置。他们使用了开源软件VisualSfM进行重建，整个相机标定过程用了6个场景，标定需要12小时的时间。
 
-浙江大学的人体反射场高速获取系统位于浙江大学紫金港校区蒙民伟楼。该系统的主要组成部分是24个RGB图像同步摄像机，相机能够拍摄得到分辨率是\(2048\times 2048\)的高清视频，拍摄的视频帧率可控，最高可以达到50帧每秒。24个相机均匀布置在框架上，环绕成一圈；系统的框架部分，整个系统是一个半球形的钢架结构，直径长达7m；系统的灯光部分，整个半球形的结构上分布着近1000盏LED冷光灯，灯光以9个为一组，每一组的开断与灯光的闪烁频率均可使用程序控制。如图\ref{fig:lightstage}所示。
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.6\linewidth]{figure/background/lightstage}
-    \caption{\label{fig:lightstage} 浙江大学人体反射场高速获取系统}
-\end{figure}
+浙江大学的人体反射场高速获取系统位于浙江大学紫金港校区蒙民伟楼。该系统的主要组成部分是24个RGB图像同步摄像机，相机能够拍摄得到分辨率是\(2048\times 2048\)的高清视频，拍摄的视频帧率可控，最高可以达到50帧每秒。24个相机均匀布置在框架上，环绕成一圈；系统的框架部分，整个系统是一个半球形的钢架结构，直径长达7m；系统的灯光部分，整个半球形的结构上分布着近1000盏LED冷光灯，灯光以9个为一组，每一组的开断与灯光的闪烁频率均可使用程序控制。如图\ref{fig:lightstage}所示。由于我们在采集数据时有一个相机有所损坏，因此只采集了23个RGB相机的数据，如图\ref{fig:lightstage}-(b)所示。
+\begin{figure}[ht] \centering
+    \subfigure[结构图] {
+        \includegraphics[height=0.4\linewidth]{figure/background/lightstage}
+    }
+    \subfigure[数据采集样例] {
+    \includegraphics[height=0.4\linewidth]{figure/background/overview}
+    }
+    \caption{\label{fig:lightstage}浙江大学LightStage系统示意图}
+\end{figure} 
 
 \subsection{国内外研究现状}
 
