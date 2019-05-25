@@ -1,10 +1,26 @@
 \cleardoublestylepage{previous}
 \begin{center}
-    \bfseries \zihao{3} 摘要
+    {\bfseries \zihao{3} 摘要}
 \end{center}
 
+从视频或图像中进行人体的三维重建是计算机视觉领域的一个重要研究方向，它在很多其他领域都有着重要的应用。而在本文的研究中，基于多个视角的视频序列能够同时获得不同的角度的人体的图像与视频序列，以这种硬件为基础的人体三维运动捕捉系统也有者较为广泛的应用前景。本文的研究基于浙江大学的人体光场反射系统，即LightStage系统，该系统主要由24个高清相机组成，本文主要解决在该场景下的人体三维姿态估计与三维运动恢复的问题。
 
-\cleardoublestylepage{previous}
+为此我们提出了多阶段的人体姿态估计过程，以充分利用从视频中获取的信息。首先我们利用目前的前沿的深度卷积网络技术获取图像中的二维关键点信息，将提取出来的人体二维关键点用于三维关键点的重建。接着我们对LightStage系统中的相机标定问题进行了探究，在传统相机标定方法的基础上开发了一种标定该系统24个相机的方法。根据相机标定的参数与从图像中获取得到的人体二维关键点位置，我们从直接进行方程求解的角度与优化问题求解的角度进行三维关键点的重建，并在Human3.6M数据集与Panoptic数据集上对两种方法进行量化测试。
+
+随着三维重建技术的发展，只进行关键点恢复已经不能满足人们的需求，并且关键点表达的信息也不够丰富。因此，我们引入了一个参数化的人体几何模型，该模型使用6890个点来表示人体表面，以及24个具有三自由度的关节表示人体姿势。我们首先将该模型拟合到了前一步重建出的人体三维关键点上，完成姿势的对准；接着我们利用基于全卷机深度神经网络的人体区域分割方法获得图像中人体的轮廓，使用获得的轮廓信息约束人体几何模型，对人体几何模型的形状进行进一步的优化。最后，我们对人体模型进行了纹理贴图的操作，完成了从多视角图像中提取人体表面纹理的功能。该功能可以进一步拓展到人体的动作迁移、人体的纹理迁移上，得到具有实用价值的三维几何模型。
+
+\textbf{关键词：}动作捕捉；人体姿态估计；人体几何模型；多视角几何
+
+% \cleardoublestylepage{previous}
+\newpage
 \begin{center}
     \bfseries \zihao{3} Abstract
 \end{center}
+
+3D human reconstruction from images or videos is an important research direction in computer vision. There are so many significant applications in lots of region. In this paper, we mainly concentrate on multiple video sequences from multiple views. The motion capture system based on this can also have broad applications. Our research based on the human light stage equipment, named LightStage system, consists of 24 RGB HD cameras. This paper mainly solves the problem of 3D human body estimation and 3D motion capture in this scene.
+
+To this end, we propose a multi-stage human pose estimation process to make full use of the information obtained from the video. First, we use the deep convolutional network to obtain the 2D joint information in the image. Then we explored the camera calibration problem in the LightStage system, and developed a method to calibrate all the 24 cameras of the system based on the traditional camera calibration method. According to the parameters calibrated by the camera and the position of the 2D joints obtained from the image, we reconstruct the 3D joints from the perspective of solving the equation directly and solving the optimization problem. The two methods were quantified on the Human3.6M dataset and Panoptic dataset.
+
+However, the information expressed by joints is not rich enough. Therefore, we introduced a parametric human geometry model named SMPL that uses 6890 points to represent the human body surface and 24 joints with three degrees of freedom to represent the human body pose. We first fit the model to the 3D joints; then we use the human body segmentation method based on the full-convolutional deep network to obtain the contour of the human in the image. The contour information constrains the human geometric model and further optimizes the shape of the human geometric model. Finally, we performed the texture mapping on the human model, and completed the function of extracting the surface texture of the human body from the multi-view image. This function can be further extended to the movement of the human body and the texture migration of the human body to obtain a practical 3D geometric model.
+
+\textbf{Keywords:} motion capture; human pose estimation; human geometry model; multi-view geometry

@@ -75,17 +75,36 @@ Gong等人\cite{cihppgn}提出了一种不需要检测的部件分组网络(Dete
 \begin{equation}
     L_{bias} = \sum_n^N || D_n ||_2
 \end{equation}
-同样使用PyTorch构造损失函数，使用梯度下降的方法进行优化，由于到每个视角的渲染过程是一个非常耗时的过程，因此我们每一次迭代的需要的时间就较久，而完成一次优化到总的损失函数收敛需要许多此迭代，因此我们的优化算法在这一步的耗时也比较长，目前对一帧的23个视角的相机进行优化，需要耗时10分钟左右。在这一步的优化中，我们使用了两阶段优化的方法，第一步优化我们固定住每个点的偏移量为0，只去优化人体模型的形状参数。在SMPL模型的形状参数收敛之后，我们再去优化每个点的偏移量，使其更接近轮廓。通过这样的两步就可以在初始化不够好的时候，避免收敛到一个较差的局部最优处。
+同样使用PyTorch构造损失函数，使用梯度下降的方法进行优化，由于到每个视角的渲染过程是一个非常耗时的过程，因此我们每一次迭代的需要的时间就较久，而完成一次优化到总的损失函数收敛需要许多此迭代，因此我们的优化算法在这一步的耗时也比较长，目前对一帧的23个视角的相机进行优化，需要耗时20分钟左右。在这一步的优化中，我们使用了两阶段优化的方法，第一步优化我们固定住每个点的偏移量为0，只去优化人体模型的形状参数。在SMPL模型的形状参数收敛之后，我们再去优化每个点的偏移量，使其更接近轮廓。通过这样的两步就可以在初始化不够好的时候，避免收敛到一个较差的局部最优处。
 
 优化之后得到的轮廓对比如图\ref{fig:maskout}所示，从图中可以看出，进行多视角的轮廓约束优化之后，我们重建的几何模型更加接近实际的图片中的人体模型，并且基于轮廓能够将之前一些不正确的人体姿态进行纠正，起到了将结果更完善的效果。
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=0.325\linewidth]{figure/result/mask/00000015_init} \hfill
-    \includegraphics[height=0.325\linewidth]{figure/result/mask/00000990_init} \hfill
-    \includegraphics[height=0.325\linewidth]{figure/result/mask/00001604_init}
-    \caption{\label{fig:maskout} 优化后的轮廓对比}
+    \includegraphics[height=0.325\linewidth]{figure/result/mask/00000015_shape} \hfill
+    \includegraphics[height=0.325\linewidth]{figure/result/mask/00000990_shape} \hfill
+    \includegraphics[height=0.325\linewidth]{figure/result/mask/00001604_shape}
+    \includegraphics[height=0.325\linewidth]{figure/result/mask/00000015_bias} \hfill
+    \includegraphics[height=0.325\linewidth]{figure/result/mask/00000990_bias} \hfill
+    \includegraphics[height=0.325\linewidth]{figure/result/mask/00001604_bias}
+    \caption{\label{fig:maskout} 优化后的轮廓对比，第一行为只对形状参数进行优化，第二行为对偏移量进行优化}
 \end{figure}
 为了进行量化，我们使用重叠率指标，对这一步优化之前的23个相机的以及这一步优化之后的重叠率的指标进行计算，其结果对比如表\ref{tab:mask}所示。从表中可以看出，这一步优化能够将重叠率大大提高。
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{lccc}
+        \hline
+              & 初始 & 形状参数优化 & 点优化  \\
+        \hline
+        演员冯 & 78.9\% &  84.1\% & 92.8\%  \\
+        演员帅 & 82.0\% & 85.4\% & 85.6\%   \\
+        演员柯 & 75.4\% & 77.5\% & 82.1\%  \\
+        \hline
+    \end{tabular}
+    \caption{优化前后IoU对比\label{tab:mask}}
+\end{table}
+%feng 78.9  84.1 92.8
+%shuai 82.0 85.4 85.6
+%ke 75.4 77.5 82.1
 
 \subsection{纹理贴图}
 通常情况下，只获得更精细的外形是不够的，一般在对人体建模的时候还需要去恢复人体的衣着外形，也就是说我们需要知道几何模型的纹理(texture)。在这一部分中，我们对模型进行纹理贴图，使我们的模型更具有表现力。
